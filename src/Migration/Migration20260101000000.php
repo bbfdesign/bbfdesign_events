@@ -4,11 +4,22 @@ declare(strict_types=1);
 
 namespace Plugin\bbfdesign_events\src\Migration;
 
-use JTL\Plugin\Migration;
-use JTL\Update\IMigration;
+use JTL\DB\DbInterface;
 
-class Migration20260101000000 extends Migration implements IMigration
+class Migration20260101000000
 {
+    private DbInterface $db;
+
+    public function __construct(DbInterface $db, string $pluginId = '')
+    {
+        $this->db = $db;
+    }
+
+    private function execute(string $sql): void
+    {
+        $this->db->executeQuery($sql);
+    }
+
     public function up(): void
     {
         $this->createCoreTables();

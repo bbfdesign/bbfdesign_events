@@ -51,6 +51,17 @@ class SeoHook
     public static function addToSitemap(array $args): void
     {
         $db = Shop::Container()->getDB();
+
+        // Check if tables exist before querying
+        try {
+            $tableCheck = $db->getSingleObject("SHOW TABLES LIKE 'bbf_events'");
+            if ($tableCheck === null) {
+                return;
+            }
+        } catch (\Throwable) {
+            return;
+        }
+
         $seoService = new SeoService();
         $baseUrl = Shop::getURL();
 
