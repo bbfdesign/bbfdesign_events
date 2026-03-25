@@ -1,0 +1,8 @@
+node_modules/
+adminmenu/js/dist/
+.idea/
+.claude/
+.DS_Store
+._*
+*.swp
+*.swo

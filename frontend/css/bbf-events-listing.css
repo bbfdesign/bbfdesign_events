@@ -1,0 +1,190 @@
+/* ==========================================================
+   BBF Events – Listing Styles
+   Nur auf der Listing-/Kategorieseite geladen.
+   ========================================================== */
+
+/* ── Listing Header ────────────────────────────────────── */
+.bbf-events-listing__header {
+    margin-bottom: 2rem;
+}
+
+.bbf-events-listing__title {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--bbf-events-text);
+    margin-bottom: 0.5rem;
+}
+
+.bbf-events-listing__description {
+    font-size: 1.125rem;
+    color: var(--bbf-events-text-muted);
+}
+
+/* ── Filter Bar ────────────────────────────────────────── */
+.bbf-filter-bar {
+    background-color: var(--bbf-events-bg);
+    border-radius: var(--bbf-events-radius);
+    padding: 1.25rem;
+    margin-bottom: 2rem;
+}
+
+.bbf-filter-bar__form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: flex-end;
+}
+
+.bbf-filter-bar__group {
+    flex: 1 1 180px;
+}
+
+.bbf-filter-bar__group--search {
+    flex: 2 1 250px;
+}
+
+.bbf-filter-bar__label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--bbf-events-text-muted);
+    margin-bottom: 0.375rem;
+}
+
+.bbf-filter-bar__actions {
+    display: flex;
+    gap: 0.5rem;
+    align-items: flex-end;
+}
+
+@media (max-width: 767.98px) {
+    .bbf-filter-bar__form {
+        flex-direction: column;
+    }
+
+    .bbf-filter-bar__group {
+        flex: 1 1 100%;
+    }
+
+    .bbf-filter-bar__actions {
+        width: 100%;
+    }
+
+    .bbf-filter-bar__submit {
+        flex: 1;
+    }
+}
+
+/* ── Event Card ────────────────────────────────────────── */
+.bbf-event-card {
+    background: #fff;
+    border-radius: var(--bbf-events-radius);
+    overflow: hidden;
+    box-shadow: var(--bbf-events-shadow);
+    transition: box-shadow var(--bbf-events-transition), transform var(--bbf-events-transition);
+    height: 100%;
+}
+
+.bbf-event-card:hover {
+    box-shadow: var(--bbf-events-shadow-hover);
+    transform: translateY(-2px);
+}
+
+.bbf-event-card--featured {
+    border: 2px solid var(--bbf-events-primary);
+}
+
+.bbf-event-card__link {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    text-decoration: none;
+    color: inherit;
+}
+
+.bbf-event-card__link:hover {
+    color: inherit;
+    text-decoration: none;
+}
+
+.bbf-event-card__image {
+    position: relative;
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+    background-color: var(--bbf-events-bg);
+}
+
+.bbf-event-card__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform var(--bbf-events-transition);
+}
+
+.bbf-event-card:hover .bbf-event-card__img {
+    transform: scale(1.03);
+}
+
+.bbf-event-card__placeholder {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, var(--bbf-events-bg), #E5E7EB);
+}
+
+.bbf-event-card__image .bbf-status-badge {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+}
+
+.bbf-event-card__body {
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.bbf-event-card__title {
+    font-size: 1.125rem;
+    font-weight: 700;
+    margin: 0.5rem 0;
+    color: var(--bbf-events-text);
+    line-height: 1.3;
+}
+
+.bbf-event-card__teaser {
+    font-size: 0.875rem;
+    color: var(--bbf-events-text-muted);
+    margin-bottom: 0.75rem;
+    flex: 1;
+}
+
+.bbf-event-card__categories {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.375rem;
+    margin-top: auto;
+}
+
+.bbf-event-card__category {
+    display: inline-block;
+    padding: 0.125rem 0.5rem;
+    font-size: 0.6875rem;
+    font-weight: 500;
+    background-color: var(--bbf-events-bg);
+    border-radius: 9999px;
+    color: var(--bbf-events-text-muted);
+}
+
+/* ── Pagination ────────────────────────────────────────── */
+.bbf-pagination {
+    margin-top: 3rem;
+    margin-bottom: 2rem;
+}
+
+.bbf-pagination__info {
+    margin-top: 0.75rem;
+    font-size: 0.8125rem;
+}

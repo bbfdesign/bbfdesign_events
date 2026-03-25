@@ -1,0 +1,232 @@
+/* ==========================================================
+   BBF Events – Detail Styles
+   Nur auf der Detailseite geladen.
+   ========================================================== */
+
+/* ── Hero ──────────────────────────────────────────────── */
+.bbf-event-detail__hero {
+    position: relative;
+    min-height: 50vh;
+    display: flex;
+    align-items: flex-end;
+    overflow: hidden;
+}
+
+.bbf-event-detail__hero-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.bbf-event-detail__hero-overlay {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    padding: 4rem 0 3rem;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent);
+    color: #fff;
+}
+
+.bbf-event-detail__title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin-bottom: 0.5rem;
+    line-height: 1.2;
+}
+
+.bbf-event-detail__subtitle {
+    font-size: 1.25rem;
+    opacity: 0.9;
+    margin-bottom: 1rem;
+}
+
+/* ── Content ───────────────────────────────────────────── */
+.bbf-event-detail__teaser {
+    margin: 2rem 0;
+}
+
+.bbf-event-detail__teaser .lead {
+    font-size: 1.25rem;
+    color: var(--bbf-events-text);
+    line-height: 1.6;
+}
+
+.bbf-event-detail__description {
+    margin-bottom: 2rem;
+    line-height: 1.7;
+    color: var(--bbf-events-text);
+}
+
+.bbf-event-detail__description h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-top: 2rem;
+    margin-bottom: 0.75rem;
+}
+
+.bbf-event-detail__description h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-top: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.bbf-event-detail__description img {
+    max-width: 100%;
+    height: auto;
+    border-radius: var(--bbf-events-radius);
+    margin: 1rem 0;
+}
+
+/* ── Sidebar ───────────────────────────────────────────── */
+.bbf-event-detail__sidebar {
+    position: sticky;
+    top: 2rem;
+}
+
+/* ── Event Meta ────────────────────────────────────────── */
+.bbf-event-meta {
+    background-color: var(--bbf-events-bg);
+    border-radius: var(--bbf-events-radius);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.bbf-event-meta__item {
+    margin-bottom: 1rem;
+}
+
+.bbf-event-meta__item:last-child {
+    margin-bottom: 0;
+}
+
+.bbf-event-meta__item strong {
+    display: block;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--bbf-events-text-muted);
+    margin-bottom: 0.25rem;
+}
+
+.bbf-event-meta__category {
+    display: inline-block;
+    padding: 0.125rem 0.5rem;
+    font-size: 0.8125rem;
+    background-color: #fff;
+    border-radius: 9999px;
+    color: var(--bbf-events-primary);
+    text-decoration: none;
+    margin: 0.125rem;
+    border: 1px solid var(--bbf-events-border);
+}
+
+.bbf-event-meta__category:hover {
+    background-color: var(--bbf-events-primary);
+    color: #fff;
+    text-decoration: none;
+}
+
+/* ── Ticket Card ───────────────────────────────────────── */
+.bbf-ticket-card {
+    background: #fff;
+    border: 1px solid var(--bbf-events-border);
+    border-radius: var(--bbf-events-radius);
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+}
+
+.bbf-ticket-card--sold-out {
+    opacity: 0.6;
+}
+
+.bbf-ticket-card__category {
+    display: inline-block;
+    padding: 0.125rem 0.5rem;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    color: #fff;
+    border-radius: 9999px;
+    margin-bottom: 0.5rem;
+}
+
+.bbf-ticket-card__name {
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 0.375rem;
+}
+
+.bbf-ticket-card__description {
+    font-size: 0.8125rem;
+    color: var(--bbf-events-text-muted);
+    margin-bottom: 0.5rem;
+}
+
+.bbf-ticket-card__price {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--bbf-events-text);
+    margin-bottom: 0.75rem;
+}
+
+.bbf-ticket-card__hint {
+    font-size: 0.75rem;
+    color: var(--bbf-events-text-muted);
+    font-style: italic;
+    margin-bottom: 0.5rem;
+}
+
+.bbf-ticket-card__action .btn {
+    width: 100%;
+}
+
+.bbf-ticket-card__provider {
+    display: block;
+    text-align: center;
+    margin-top: 0.25rem;
+    font-size: 0.6875rem;
+    color: var(--bbf-events-text-muted);
+}
+
+/* ── Pagebuilder Content ───────────────────────────────── */
+.bbf-event-detail__content {
+    /* Container for Pagebuilder output */
+}
+
+/* Pagebuilder section base */
+.bbf-section {
+    padding: 3.75rem 0;
+}
+
+/* Dynamic block placeholder (should not appear in frontend) */
+.bbf-dynamic-placeholder {
+    display: none;
+}
+
+/* ── Responsive ────────────────────────────────────────── */
+@media (max-width: 991.98px) {
+    .bbf-event-detail__title {
+        font-size: 2rem;
+    }
+
+    .bbf-event-detail__hero {
+        min-height: 40vh;
+    }
+
+    .bbf-event-detail__sidebar {
+        position: static;
+        margin-top: 2rem;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .bbf-event-detail__title {
+        font-size: 1.5rem;
+    }
+
+    .bbf-event-detail__hero {
+        min-height: 30vh;
+    }
+}

@@ -1,0 +1,150 @@
+# BBF Events – English translations
+# Plugin: bbfdesign_events
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Language: en\n"
+
+msgid "eventsOverview"
+msgstr "Events"
+
+msgid "eventsArchive"
+msgstr "Event Archive"
+
+msgid "noEventsFound"
+msgstr "No events found."
+
+msgid "showAllEvents"
+msgstr "Show all events"
+
+msgid "upcomingEvents"
+msgstr "Upcoming Events"
+
+msgid "pastEvents"
+msgstr "Past Events"
+
+msgid "allEvents"
+msgstr "All Events"
+
+msgid "filterCategory"
+msgstr "Category"
+
+msgid "filterPeriod"
+msgstr "Period"
+
+msgid "filterSort"
+msgstr "Sort by"
+
+msgid "filterSearch"
+msgstr "Search events..."
+
+msgid "filterApply"
+msgstr "Filter"
+
+msgid "filterReset"
+msgstr "Reset"
+
+msgid "allCategories"
+msgstr "All Categories"
+
+msgid "sortDateAsc"
+msgstr "Date ascending"
+
+msgid "sortDateDesc"
+msgstr "Date descending"
+
+msgid "sortTitle"
+msgstr "Title"
+
+msgid "sortFeatured"
+msgstr "Featured"
+
+msgid "statusUpcoming"
+msgstr "Upcoming"
+
+msgid "statusRunning"
+msgstr "Running now"
+
+msgid "statusPast"
+msgstr "Past"
+
+msgid "statusDraft"
+msgstr "Draft"
+
+msgid "statusScheduled"
+msgstr "Scheduled"
+
+msgid "statusPublished"
+msgstr "Published"
+
+msgid "statusArchived"
+msgstr "Archived"
+
+msgid "tickets"
+msgstr "Tickets"
+
+msgid "ticketsSoldOut"
+msgstr "Sold Out"
+
+msgid "ticketsBuyNow"
+msgstr "Buy Now"
+
+msgid "ticketsExternal"
+msgstr "External Tickets"
+
+msgid "ticketsAddToCart"
+msgstr "Add to Cart"
+
+msgid "ticketsNotAvailable"
+msgstr "Not Available"
+
+msgid "partners"
+msgstr "Partners & Sponsors"
+
+msgid "program"
+msgstr "Program"
+
+msgid "knowledge"
+msgstr "Good to Know"
+
+msgid "areaMap"
+msgstr "Venue Map"
+
+msgid "moreEvents"
+msgstr "More Events"
+
+msgid "share"
+msgstr "Share"
+
+msgid "shareOnFacebook"
+msgstr "Share on Facebook"
+
+msgid "shareOnTwitter"
+msgstr "Share on X"
+
+msgid "shareByEmail"
+msgstr "Share by Email"
+
+msgid "date"
+msgstr "Date"
+
+msgid "categories"
+msgstr "Categories"
+
+msgid "allDay"
+msgstr "All Day"
+
+msgid "pageOf"
+msgstr "Page %d of %d"
+
+msgid "eventsCount"
+msgstr "%d events"
+
+msgid "moreInfo"
+msgstr "Learn More"
+
+msgid "backToList"
+msgstr "Back to Overview"
+
+msgid "via"
+msgstr "via"

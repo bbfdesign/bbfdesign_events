@@ -1,0 +1,150 @@
+# BBF Events – Deutsche Sprachvariablen
+# Plugin: bbfdesign_events
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Language: de\n"
+
+msgid "eventsOverview"
+msgstr "Veranstaltungen"
+
+msgid "eventsArchive"
+msgstr "Veranstaltungsarchiv"
+
+msgid "noEventsFound"
+msgstr "Keine Veranstaltungen gefunden."
+
+msgid "showAllEvents"
+msgstr "Alle Veranstaltungen anzeigen"
+
+msgid "upcomingEvents"
+msgstr "Kommende Veranstaltungen"
+
+msgid "pastEvents"
+msgstr "Vergangene Veranstaltungen"
+
+msgid "allEvents"
+msgstr "Alle Veranstaltungen"
+
+msgid "filterCategory"
+msgstr "Kategorie"
+
+msgid "filterPeriod"
+msgstr "Zeitraum"
+
+msgid "filterSort"
+msgstr "Sortierung"
+
+msgid "filterSearch"
+msgstr "Veranstaltung suchen..."
+
+msgid "filterApply"
+msgstr "Filtern"
+
+msgid "filterReset"
+msgstr "Zurücksetzen"
+
+msgid "allCategories"
+msgstr "Alle Kategorien"
+
+msgid "sortDateAsc"
+msgstr "Datum aufsteigend"
+
+msgid "sortDateDesc"
+msgstr "Datum absteigend"
+
+msgid "sortTitle"
+msgstr "Titel"
+
+msgid "sortFeatured"
+msgstr "Empfohlen"
+
+msgid "statusUpcoming"
+msgstr "Kommend"
+
+msgid "statusRunning"
+msgstr "Läuft gerade"
+
+msgid "statusPast"
+msgstr "Vergangen"
+
+msgid "statusDraft"
+msgstr "Entwurf"
+
+msgid "statusScheduled"
+msgstr "Geplant"
+
+msgid "statusPublished"
+msgstr "Veröffentlicht"
+
+msgid "statusArchived"
+msgstr "Archiviert"
+
+msgid "tickets"
+msgstr "Tickets"
+
+msgid "ticketsSoldOut"
+msgstr "Ausverkauft"
+
+msgid "ticketsBuyNow"
+msgstr "Jetzt kaufen"
+
+msgid "ticketsExternal"
+msgstr "Tickets extern"
+
+msgid "ticketsAddToCart"
+msgstr "In den Warenkorb"
+
+msgid "ticketsNotAvailable"
+msgstr "Nicht verfügbar"
+
+msgid "partners"
+msgstr "Partner & Sponsoren"
+
+msgid "program"
+msgstr "Programm"
+
+msgid "knowledge"
+msgstr "Wissenswertes"
+
+msgid "areaMap"
+msgstr "Geländeplan"
+
+msgid "moreEvents"
+msgstr "Weitere Veranstaltungen"
+
+msgid "share"
+msgstr "Teilen"
+
+msgid "shareOnFacebook"
+msgstr "Auf Facebook teilen"
+
+msgid "shareOnTwitter"
+msgstr "Auf X teilen"
+
+msgid "shareByEmail"
+msgstr "Per E-Mail teilen"
+
+msgid "date"
+msgstr "Termin"
+
+msgid "categories"
+msgstr "Kategorien"
+
+msgid "allDay"
+msgstr "Ganztägig"
+
+msgid "pageOf"
+msgstr "Seite %d von %d"
+
+msgid "eventsCount"
+msgstr "%d Veranstaltungen"
+
+msgid "moreInfo"
+msgstr "Mehr erfahren"
+
+msgid "backToList"
+msgstr "Zurück zur Übersicht"
+
+msgid "via"
+msgstr "via"

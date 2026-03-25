@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<jtlshopplugin>
+    <Name>BBF Events</Name>
+    <Description>Event-Management-Plugin mit visuellem Pagebuilder, Programm, Partnern, Tickets und mehr.</Description>
+    <Author>BBF Design</Author>
+    <URL>https://bbf-design.de</URL>
+    <PluginID>bbfdesign_events</PluginID>
+    <Version>1.0.0</Version>
+    <MinShopVersion>5.2.0</MinShopVersion>
+    <XMLVersion>100</XMLVersion>
+    <ShopCompat>
+        <MinVersion>5.2.0</MinVersion>
+        <MaxVersion>5.99.0</MaxVersion>
+    </ShopCompat>
+    <Install>
+        <Migrations>
+            <Migration>src/Migration/Migration20260101000000.php</Migration>
+        </Migrations>
+    </Install>
+    <Bootstrapper>Bootstrap</Bootstrapper>
+    <AdminMenu>
+        <Folder>adminmenu</Folder>
+        <CustomLink>
+            <Name>Veranstaltungen</Name>
+            <Link>events</Link>
+            <Icon>fa-calendar-alt</Icon>
+        </CustomLink>
+        <CustomLink>
+            <Name>Kategorien</Name>
+            <Link>categories</Link>
+            <Icon>fa-tags</Icon>
+        </CustomLink>
+        <CustomLink>
+            <Name>Partner / Sponsoren</Name>
+            <Link>partners</Link>
+            <Icon>fa-handshake</Icon>
+        </CustomLink>
+        <CustomLink>
+            <Name>Wissenswertes</Name>
+            <Link>knowledge</Link>
+            <Icon>fa-lightbulb</Icon>
+        </CustomLink>
+        <CustomLink>
+            <Name>Tickets</Name>
+            <Link>tickets</Link>
+            <Icon>fa-ticket-alt</Icon>
+        </CustomLink>
+        <CustomLink>
+            <Name>Areas / Karten</Name>
+            <Link>areas</Link>
+            <Icon>fa-map-marked-alt</Icon>
+        </CustomLink>
+        <CustomLink>
+            <Name>Einstellungen</Name>
+            <Link>settings</Link>
+            <Icon>fa-cog</Icon>
+        </CustomLink>
+    </AdminMenu>
+    <Hooks>
+        <Hook>
+            <ID>140</ID>
+            <Class>Plugin\bbfdesign_events\src\Hook\SeoHook</Class>
+            <Method>handleRouting</Method>
+        </Hook>
+        <Hook>
+            <ID>142</ID>
+            <Class>Plugin\bbfdesign_events\src\Hook\SeoHook</Class>
+            <Method>addToSitemap</Method>
+        </Hook>
+        <Hook>
+            <ID>99</ID>
+            <Class>Plugin\bbfdesign_events\src\Hook\CacheHook</Class>
+            <Method>invalidate</Method>
+        </Hook>
+    </Hooks>
+</jtlshopplugin>

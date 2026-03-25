@@ -1,0 +1,131 @@
+/* ==========================================================
+   BBF Events – Core Styles
+   Basis-Styles die auf Listing + Detail geladen werden.
+   ========================================================== */
+
+/* ── Variables ─────────────────────────────────────────── */
+:root {
+    --bbf-events-primary: #2563EB;
+    --bbf-events-primary-dark: #1D4ED8;
+    --bbf-events-text: #1F2937;
+    --bbf-events-text-muted: #6B7280;
+    --bbf-events-border: #E5E7EB;
+    --bbf-events-bg: #F9FAFB;
+    --bbf-events-radius: 0.5rem;
+    --bbf-events-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    --bbf-events-shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.15);
+    --bbf-events-transition: 0.2s ease;
+}
+
+/* ── Status Badges ─────────────────────────────────────── */
+.bbf-status-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+    border-radius: 9999px;
+    line-height: 1;
+}
+
+.bbf-status-badge--running {
+    background-color: #DCFCE7;
+    color: #166534;
+}
+
+.bbf-status-badge--past {
+    background-color: #F3F4F6;
+    color: #6B7280;
+}
+
+.bbf-status-badge--upcoming {
+    background-color: #DBEAFE;
+    color: #1E40AF;
+}
+
+/* ── Event Dates ───────────────────────────────────────── */
+.bbf-event-dates {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    align-items: baseline;
+    color: var(--bbf-events-primary);
+    font-weight: 600;
+    font-size: 0.875rem;
+}
+
+.bbf-event-dates--compact .bbf-event-dates__item {
+    display: inline;
+}
+
+.bbf-event-dates__day {
+    font-size: 1.125rem;
+    font-weight: 700;
+}
+
+.bbf-event-dates__month {
+    font-size: 0.75rem;
+    color: var(--bbf-events-text-muted);
+}
+
+.bbf-event-dates__time {
+    display: block;
+    font-size: 0.8125rem;
+    font-weight: 400;
+    color: var(--bbf-events-text-muted);
+}
+
+/* ── Share Buttons ─────────────────────────────────────── */
+.bbf-share {
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--bbf-events-border);
+}
+
+.bbf-share__label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--bbf-events-text-muted);
+}
+
+.bbf-share__buttons {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.bbf-share__btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 50%;
+    color: #fff;
+    text-decoration: none;
+    transition: opacity var(--bbf-events-transition);
+}
+
+.bbf-share__btn:hover {
+    opacity: 0.8;
+    color: #fff;
+}
+
+.bbf-share__btn--facebook { background-color: #1877F2; }
+.bbf-share__btn--twitter { background-color: #1DA1F2; }
+.bbf-share__btn--email { background-color: #6B7280; }
+
+/* ── Empty State ───────────────────────────────────────── */
+.bbf-events-empty {
+    text-align: center;
+    padding: 4rem 1rem;
+    color: var(--bbf-events-text-muted);
+}
+
+.bbf-events-empty p {
+    font-size: 1.125rem;
+    margin-bottom: 1rem;
+}
