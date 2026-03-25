@@ -16,9 +16,16 @@ class Bootstrap extends Bootstrapper
     {
         parent::boot($dispatcher);
 
-        $dispatcher->listen('shop.hook.' . \HOOK_SMARTY_OUTPUTFILTER, [SeoHook::class, 'handleRouting']);
-        $dispatcher->listen('shop.hook.' . \HOOK_SITEMAP_EXPORT, [SeoHook::class, 'addToSitemap']);
-        $dispatcher->listen('shop.hook.' . \HOOK_BACKEND_FUNCTIONS_SAVE, [CacheHook::class, 'invalidate']);
+        // Hook 140: HOOK_SMARTY_OUTPUTFILTER – SEO URL Routing
+        $dispatcher->listen('shop.hook.140', [SeoHook::class, 'handleRouting']);
+
+        // Hook 142: HOOK_SITEMAP_EXPORT_BUILDINDEX – Sitemap Integration
+        $dispatcher->listen('shop.hook.142', [SeoHook::class, 'addToSitemap']);
+
+        // Hook 99: HOOK_BACKEND_FUNCTIONS_AFTER – Cache Invalidierung
+        $dispatcher->listen('shop.hook.99', [CacheHook::class, 'invalidate']);
+
+        // Custom Event: BBF Search Plugin Integration
         $dispatcher->listen('bbf.search.index', [SearchHook::class, 'provideSearchData']);
     }
 
