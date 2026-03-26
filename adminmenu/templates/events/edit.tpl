@@ -67,12 +67,12 @@
         <div class="tab-content">
             {* ── Tab: Allgemein ── *}
             <div class="tab-pane fade show active" id="tab-general">
-                {include file="{$smarty.current_dir}/_form_general.tpl"}
+                {include file="{$tplPath}events/_form_general.tpl"}
             </div>
 
             {* ── Tab: Termine ── *}
             <div class="tab-pane fade" id="tab-dates">
-                {include file="{$smarty.current_dir}/_form_dates.tpl"}
+                {include file="{$tplPath}events/_form_dates.tpl"}
             </div>
 
             {* ── Tab: Kategorien ── *}
@@ -103,61 +103,61 @@
             {* ── Tab: Programm ── *}
             {if $isEdit}
                 <div class="tab-pane fade" id="tab-program">
-                    {include file="{$smarty.current_dir}/_form_program.tpl"}
+                    {include file="{$tplPath}events/_form_program.tpl"}
                 </div>
             {/if}
 
             {* ── Tab: Tickets ── *}
             {if $isEdit}
                 <div class="tab-pane fade" id="tab-tickets">
-                    {include file="{$smarty.current_dir}/_form_tickets.tpl"}
+                    {include file="{$tplPath}events/_form_tickets.tpl"}
                 </div>
             {/if}
 
             {* ── Tab: Partner ── *}
             {if $isEdit}
                 <div class="tab-pane fade" id="tab-partners">
-                    {include file="{$smarty.current_dir}/_form_partners.tpl"}
+                    {include file="{$tplPath}events/_form_partners.tpl"}
                 </div>
             {/if}
 
             {* ── Tab: Wissenswertes ── *}
             {if $isEdit}
                 <div class="tab-pane fade" id="tab-knowledge">
-                    {include file="{$smarty.current_dir}/_form_knowledge.tpl"}
+                    {include file="{$tplPath}events/_form_knowledge.tpl"}
                 </div>
             {/if}
 
             {* ── Tab: Area / Karte ── *}
             {if $isEdit}
                 <div class="tab-pane fade" id="tab-area">
-                    {include file="{$smarty.current_dir}/_form_area.tpl"}
+                    {include file="{$tplPath}events/_form_area.tpl"}
                 </div>
             {/if}
 
             {* ── Tab: Medien ── *}
             {if $isEdit}
                 <div class="tab-pane fade" id="tab-media">
-                    {include file="{$smarty.current_dir}/_form_media.tpl"}
+                    {include file="{$tplPath}events/_form_media.tpl"}
                 </div>
             {/if}
 
             {* ── Tab: Verlinkungen ── *}
             {if $isEdit}
                 <div class="tab-pane fade" id="tab-links">
-                    {include file="{$smarty.current_dir}/_form_links.tpl"}
+                    {include file="{$tplPath}events/_form_links.tpl"}
                 </div>
             {/if}
 
             {* ── Tab: SEO ── *}
             <div class="tab-pane fade" id="tab-seo">
-                {include file="{$smarty.current_dir}/_form_seo.tpl"}
+                {include file="{$tplPath}events/_form_seo.tpl"}
             </div>
 
             {* ── Tab: Layout ── *}
             {if $isEdit}
                 <div class="tab-pane fade" id="tab-layout">
-                    {include file="{$smarty.current_dir}/_form_layout.tpl"}
+                    {include file="{$tplPath}events/_form_layout.tpl"}
                 </div>
             {/if}
         </div>

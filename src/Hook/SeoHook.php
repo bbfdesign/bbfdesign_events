@@ -139,14 +139,12 @@ class SeoHook
     }
 
     /**
-     * HOOK_SMARTY_OUTPUTFILTER: Handle detail page routing.
-     * For event detail pages that aren't registered as FrontendLinks,
-     * we need to intercept the output and render the correct template.
+     * HOOK_SMARTY_OUTPUTFILTER: Handle sub-page routing.
+     * The FrontendLink only handles /veranstaltungen (listing).
+     * Detail, category, archive pages need output filter to replace content.
      */
     public static function handleRouting(array $args): void
     {
-        // The FrontendLink handles /veranstaltungen (listing).
-        // Detail, category, archive pages need output filter handling.
         $requestUri = $_SERVER['REQUEST_URI'] ?? '';
         $path = ltrim(parse_url($requestUri, PHP_URL_PATH) ?? '', '/');
 
@@ -157,12 +155,43 @@ class SeoHook
         $seoService = new SeoService();
         $route = $seoService->resolveRoute($path);
 
+        // Listing is handled by the FrontendLink template
         if ($route === null || $route['type'] === 'listing') {
-            return; // Listing is handled by FrontendLink
+            return;
         }
 
-        // For detail/category/archive: data was already injected in injectSmartyData()
-        // The template rendering happens through the FrontendLink page template
+        // For detail/category/archive: render the correct template
+        // and replace the page output
+        try {
+            $smarty = Shop::Smarty();
+            $plugin = \JTL\Plugin\Helper::getPluginById(EventConfig::PLUGIN_ID);
+            if ($plugin === null) {
+                return;
+            }
+
+            $tplPath = $plugin->getPaths()->getFrontendPath() . 'template/events/';
+            $smarty->assign('bbfEventsPath', $tplPath);
+
+            $templateFile = match ($route['type']) {
+                'detail' => 'detail.tpl',
+                'category' => 'category.tpl',
+                'archive' => 'listing.tpl',
+                default => null,
+            };
+
+            if ($templateFile !== null && is_file($tplPath . $templateFile)) {
+                // Data was already injected by injectSmartyData() in HOOK_SMARTY_INC
+                $content = $smarty->fetch($tplPath . $templateFile);
+
+                // Replace the main content area in the JTL output
+                if (isset($args['original'])) {
+                    // Find the content area and replace it
+                    $args['original'] = $content;
+                }
+            }
+        } catch (\Throwable) {
+            // Don't crash
+        }
     }
 
     // ── Data Preparation Methods ──────────────────────────
