@@ -15,7 +15,7 @@ use Plugin\bbfdesign_events\src\Controller\Backend\EventAdminController;
 use Plugin\bbfdesign_events\src\Controller\Backend\KnowledgeAdminController;
 use Plugin\bbfdesign_events\src\Controller\Backend\PartnerAdminController;
 use Plugin\bbfdesign_events\src\Controller\Backend\TicketAdminController;
-use Plugin\bbfdesign_events\src\Hook\SeoHook;
+use Plugin\bbfdesign_events\src\Controller\Frontend\EventPageController;
 use Plugin\bbfdesign_events\src\Hook\SearchHook;
 use Plugin\bbfdesign_events\src\Migration\Migration20260101000000;
 
@@ -25,15 +25,59 @@ class Bootstrap extends Bootstrapper
     {
         parent::boot($dispatcher);
 
-        if (Shop::isFrontend()) {
-            $dispatcher->listen('shop.hook.140', static function (array $args) {
-                SeoHook::handleRouting($args);
+        // Frontend routes via JTL Router (HOOK_ROUTER_PRE_DISPATCH)
+        if (\defined('HOOK_ROUTER_PRE_DISPATCH')) {
+            $dispatcher->listen('shop.hook.' . \HOOK_ROUTER_PRE_DISPATCH, function (array $args) {
+                $this->registerFrontendRoutes($args);
             });
         }
 
+        // BBF Search Plugin Integration
         $dispatcher->listen('bbf.search.index', static function (array $args) {
             SearchHook::provideSearchData($args);
         });
+    }
+
+    private function registerFrontendRoutes(array $args): void
+    {
+        $router = $args['router'];
+        $db = Shop::Container()->getDB();
+        $cache = Shop::Container()->getCache();
+        $state = Shop::getState();
+        $config = \JTL\Shopsetting::getInstance()->getAll();
+        $alertService = Shop::Container()->getAlertService();
+
+        $controller = new EventPageController(
+            $db, $cache, $state, $config, $alertService
+        );
+
+        // Listing: /veranstaltungen
+        $router->addRoute(
+            '/veranstaltungen',
+            [$controller, 'listing'],
+            'bbfEventsListing'
+        );
+
+        // Archive: /veranstaltungen/archiv
+        $router->addRoute(
+            '/veranstaltungen/archiv',
+            [$controller, 'archive'],
+            'bbfEventsArchive'
+        );
+
+        // Category: /veranstaltungen/kategorie/{slug}
+        $router->addRoute(
+            '/veranstaltungen/kategorie/{slug}',
+            [$controller, 'category'],
+            'bbfEventsCategory'
+        );
+
+        // Detail: /veranstaltungen/{slug}
+        $router->addRoute(
+            '/veranstaltungen/{slug}',
+            [$controller, 'detail'],
+            'bbfEventsDetail'
+        );
     }
 
     public function installed(): void
