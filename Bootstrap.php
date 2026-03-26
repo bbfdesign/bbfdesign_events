@@ -216,21 +216,41 @@ class Bootstrap extends Bootstrapper
 
     private function handlePageLoad(DbInterface $db): array
     {
+        $eventId = (int) ($_REQUEST['event_id'] ?? 0);
+        $lang = $_REQUEST['lang'] ?? 'ger';
         $repo = new \Plugin\bbfdesign_events\src\Repository\PagebuilderRepository($db);
-        $page = $repo->findByEventAndLanguage((int) ($_GET['event_id'] ?? 0), $_GET['lang'] ?? 'ger');
+        $page = $repo->findByEventAndLanguage($eventId, $lang);
         return ['success' => true, 'gjs_data' => $page?->gjsData, 'html_rendered' => $page?->htmlRendered, 'css_rendered' => $page?->cssRendered];
     }
 
     private function handlePageSave(DbInterface $db): array
     {
-        $input = json_decode(file_get_contents('php://input'), true);
+        // Support both FormData POST and JSON POST
+        $eventId = (int) ($_POST['event_id'] ?? 0);
+        $langIso = $_POST['language_iso'] ?? 'ger';
+        $gjsData = $_POST['gjs_data'] ?? null;
+        $htmlRendered = $_POST['html_rendered'] ?? null;
+        $cssRendered = $_POST['css_rendered'] ?? null;
+
+        if ($eventId === 0) {
+            // Fallback: try JSON body
+            $input = json_decode(file_get_contents('php://input'), true);
+            if ($input) {
+                $eventId = (int) ($input['event_id'] ?? 0);
+                $langIso = $input['language_iso'] ?? 'ger';
+                $gjsData = $input['gjs_data'] ?? null;
+                $htmlRendered = $input['html_rendered'] ?? null;
+                $cssRendered = $input['css_rendered'] ?? null;
+            }
+        }
+
         $repo = new \Plugin\bbfdesign_events\src\Repository\PagebuilderRepository($db);
         $page = new \Plugin\bbfdesign_events\src\Model\Pagebuilder\EventPage();
-        $page->eventId = (int) ($input['event_id'] ?? 0);
-        $page->languageIso = $input['language_iso'] ?? 'ger';
-        $page->gjsData = $input['gjs_data'] ?? null;
-        $page->htmlRendered = $input['html_rendered'] ?? null;
-        $page->cssRendered = $input['css_rendered'] ?? null;
+        $page->eventId = $eventId;
+        $page->languageIso = $langIso;
+        $page->gjsData = $gjsData;
+        $page->htmlRendered = $htmlRendered;
+        $page->cssRendered = $cssRendered;
         $repo->savePage($page);
         return ['success' => true];
     }

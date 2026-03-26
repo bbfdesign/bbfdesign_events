@@ -256,6 +256,9 @@ class EventAdminController
         $this->smarty->assign('assignedAreaIds', $assignedAreaIds);
         $this->smarty->assign('eventMedia', $eventMedia);
         $this->smarty->assign('eventLinks', $eventLinks);
+
+        // Pagebuilder vars (for inline GrapesJS in layout tab)
+        $this->smarty->assign('currentLang', EventConfig::DEFAULT_LANGUAGE);
     }
 
     private function handleSave(): void

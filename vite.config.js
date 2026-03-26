@@ -4,7 +4,7 @@ export default defineConfig({
     build: {
         outDir: 'adminmenu/js/dist',
         lib: {
-            entry: 'adminmenu/js/pagebuilder.js',
+            entry: 'adminmenu/js/src/pagebuilder.js',
             name: 'BbfPagebuilder',
             fileName: 'bbf-pagebuilder',
             formats: ['iife'],

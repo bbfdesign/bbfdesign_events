@@ -1,29 +1,20 @@
-<div class="card">
-    <div class="card-header d-flex justify-content-between align-items-center">
-        <strong>Visueller Seiteneditor (GrapesJS)</strong>
-        <a href="{$postURL}&bbf_page=events&action=pagebuilder&id={$event->id}" class="btn btn-sm btn-primary" target="_blank">
-            <i class="fa fa-external-link-alt"></i> Pagebuilder öffnen
-        </a>
-    </div>
-    <div class="card-body">
-        <p class="text-muted">
-            Der visuelle Pagebuilder ermöglicht es, die Detailseite per Drag-and-Drop zu gestalten.
-            Öffnen Sie den Pagebuilder in einem separaten Fenster, um das Layout zu bearbeiten.
-        </p>
-
-        <div class="alert alert-info">
-            <strong>Hinweis:</strong> Wenn kein Pagebuilder-Layout vorhanden ist, wird die Detailseite
-            automatisch aus den Stammdaten (Hero, Beschreibung, Sidebar) generiert.
-        </div>
-
-        <div id="bbf-pagebuilder-preview" style="min-height: 200px; border: 2px dashed #dee2e6; border-radius: 0.5rem; display: flex; align-items: center; justify-content: center;">
-            <div class="text-center text-muted">
-                <i class="fa fa-paint-brush fa-3x mb-3 d-block"></i>
-                <p>Pagebuilder-Vorschau</p>
-                <a href="{$postURL}&bbf_page=events&action=pagebuilder&id={$event->id}" class="btn btn-outline-primary" target="_blank">
-                    Seitenlayout bearbeiten
-                </a>
-            </div>
-        </div>
-    </div>
+<div class="alert alert-info mb-3">
+    <strong>Hinweis:</strong> Wenn kein Pagebuilder-Layout vorhanden ist, wird die Detailseite
+    automatisch aus den Stammdaten (Hero, Beschreibung, Sidebar) generiert.
 </div>
+
+{* GrapesJS Pagebuilder – inline im Tab, analog zum BBF Formbuilder *}
+{include file="{$tplPath}events/pagebuilder.tpl"}
+
+{* GrapesJS CSS (nur laden wenn Tab aktiv) *}
+<link rel="stylesheet" href="https://unpkg.com/grapesjs@0.21.13/dist/css/grapes.min.css">
+
+{* GrapesJS JS + BBF Pagebuilder Bundle *}
+<script src="https://unpkg.com/grapesjs@0.21.13/dist/grapes.min.js"></script>
+<script src="https://unpkg.com/grapesjs-preset-webpage@1.0.3/dist/index.js"></script>
+
+{* BBF Pagebuilder IIFE – falls npm build durchgeführt, aus dist laden *}
+{* Fallback: CDN wird im pagebuilder.tpl direkt init *}
+{if file_exists("{$tplPath}../../js/dist/bbf-pagebuilder.iife.js")}
+    <script src="{$adminUrl}/../plugins/bbfdesign_events/adminmenu/js/dist/bbf-pagebuilder.iife.js"></script>
+{/if}
