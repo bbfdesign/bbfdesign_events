@@ -19,6 +19,7 @@
 
     {* Karten-Stammdaten *}
     <form method="post" action="{$postURL}&bbf_page=areas&action=save">
+        {$jtl_token}
         <input type="hidden" name="map_id" value="{$map->id|default:0}">
 
         <div class="row">
@@ -129,6 +130,7 @@
                 <div class="card-header"><strong>Neue Gruppe</strong></div>
                 <div class="card-body">
                     <form method="post" action="{$postURL}&bbf_page=areas&action=save_group" class="row g-3 align-items-end">
+                        {$jtl_token}
                         <input type="hidden" name="map_id" value="{$map->id}">
                         <input type="hidden" name="group_id" value="0">
                         <div class="col-md-3">
@@ -183,6 +185,7 @@
                 <div class="card-header"><strong>Neuen Marker hinzufügen</strong></div>
                 <div class="card-body">
                     <form method="post" action="{$postURL}&bbf_page=areas&action=save_marker">
+                        {$jtl_token}
                         <input type="hidden" name="map_id" value="{$map->id}">
                         <input type="hidden" name="marker_id" value="0">
                         <div class="row g-3">

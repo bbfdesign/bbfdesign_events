@@ -82,8 +82,14 @@ class DateHelper
         if ($value === null || $value === '') {
             return null;
         }
-        $parsed = \DateTimeImmutable::createFromFormat('Y-m-d H:i:s', $value);
-        return $parsed !== false ? $parsed : null;
+        // Try multiple formats: DB format, datetime-local input, date-only
+        foreach (['Y-m-d H:i:s', 'Y-m-d\TH:i:s', 'Y-m-d\TH:i', 'Y-m-d H:i'] as $format) {
+            $parsed = \DateTimeImmutable::createFromFormat($format, $value);
+            if ($parsed !== false) {
+                return $parsed;
+            }
+        }
+        return null;
     }
 
     public static function parseTime(?string $value): ?\DateTimeImmutable

@@ -12,6 +12,7 @@
     {/if}
 
     <form method="post" action="{$postURL}&bbf_page=knowledge&action=save">
+        {$jtl_token}
         <input type="hidden" name="item_id" value="{$item->id|default:0}">
 
         <div class="row">

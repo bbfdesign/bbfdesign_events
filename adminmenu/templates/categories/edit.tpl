@@ -12,6 +12,7 @@
     {/if}
 
     <form method="post" action="{$postURL}&bbf_page=categories&action=save">
+        {$jtl_token}
         <input type="hidden" name="category_id" value="{$category->id}">
 
         <div class="row">

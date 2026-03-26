@@ -17,6 +17,7 @@
     {/if}
 
     <form method="post" action="{$postURL}&bbf_page=events&action=save" enctype="multipart/form-data">
+        {$jtl_token}
         <input type="hidden" name="event_id" value="{$event->id}">
 
         {* Tab-Navigation *}

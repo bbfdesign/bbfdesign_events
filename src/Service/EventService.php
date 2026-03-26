@@ -54,9 +54,12 @@ class EventService
 
     public function saveEvent(Event $event): int
     {
-        if ($event->slug === '' && !empty($event->translations)) {
-            $title = $event->translations[0]->title ?? 'event';
-            $event->slug = SlugHelper::generate($title);
+        if ($event->slug === '') {
+            $title = !empty($event->translations) ? ($event->translations[0]->title ?? '') : '';
+            $event->slug = SlugHelper::generate($title !== '' ? $title : 'event');
+        }
+        if ($event->slug === '') {
+            $event->slug = 'event';
         }
 
         $event->slug = SlugHelper::ensureUnique(

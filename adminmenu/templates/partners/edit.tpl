@@ -12,6 +12,7 @@
     {/if}
 
     <form method="post" action="{$postURL}&bbf_page=partners&action=save">
+        {$jtl_token}
         <input type="hidden" name="partner_id" value="{$partner->id|default:0}">
 
         <div class="row">

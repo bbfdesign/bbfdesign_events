@@ -30,6 +30,7 @@
                 <div class="card-header"><strong>Wartung</strong></div>
                 <div class="card-body">
                     <form method="post">
+                        {$jtl_token}
                         <input type="hidden" name="action" value="clear_cache">
                         <p class="text-muted">Leert alle Event-bezogenen Caches.</p>
                         <button type="submit" class="btn btn-warning">
