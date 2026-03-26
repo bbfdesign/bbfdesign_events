@@ -4,10 +4,17 @@ declare(strict_types=1);
 
 namespace Plugin\bbfdesign_events;
 
+use JTL\DB\DbInterface;
 use JTL\Events\Dispatcher;
 use JTL\Plugin\Bootstrapper;
 use JTL\Shop;
 use JTL\Smarty\JTLSmarty;
+use Plugin\bbfdesign_events\src\Controller\Backend\AreaAdminController;
+use Plugin\bbfdesign_events\src\Controller\Backend\CategoryAdminController;
+use Plugin\bbfdesign_events\src\Controller\Backend\EventAdminController;
+use Plugin\bbfdesign_events\src\Controller\Backend\KnowledgeAdminController;
+use Plugin\bbfdesign_events\src\Controller\Backend\PartnerAdminController;
+use Plugin\bbfdesign_events\src\Controller\Backend\TicketAdminController;
 use Plugin\bbfdesign_events\src\Hook\SeoHook;
 use Plugin\bbfdesign_events\src\Hook\SearchHook;
 use Plugin\bbfdesign_events\src\Migration\Migration20260101000000;
@@ -19,13 +26,11 @@ class Bootstrap extends Bootstrapper
         parent::boot($dispatcher);
 
         if (Shop::isFrontend()) {
-            // Hook 140: HOOK_SMARTY_OUTPUTFILTER – SEO URL Routing
             $dispatcher->listen('shop.hook.140', static function (array $args) {
                 SeoHook::handleRouting($args);
             });
         }
 
-        // Custom Event: BBF Search Plugin Integration
         $dispatcher->listen('bbf.search.index', static function (array $args) {
             SearchHook::provideSearchData($args);
         });
@@ -50,49 +55,80 @@ class Bootstrap extends Bootstrapper
                 $db = Shop::Container()->getDB();
                 $migration = new Migration20260101000000($db, $this->getPlugin()->getPluginID());
                 $migration->down();
-            } catch (\Throwable $e) {
-                // Silently fail on uninstall
+            } catch (\Throwable) {
             }
         }
         parent::uninstalled($deleteData);
     }
 
-    /**
-     * Renders the admin menu tab content.
-     * JTL calls this method when the plugin's admin page is opened.
-     */
     public function renderAdminMenuTab(string $tabName, int $menuID, JTLSmarty $smarty): string
     {
         $plugin = $this->getPlugin();
         $db = Shop::Container()->getDB();
         $tplPath = $plugin->getPaths()->getAdminPath() . 'templates/';
-        $adminUrl = $plugin->getPaths()->getAdminURL();
+        $postURL = Shop::getAdminURL() . '/plugin.php?kPlugin=' . $plugin->getID();
 
         $smarty->assign([
             'plugin'        => $plugin,
             'langVars'      => $plugin->getLocalization(),
-            'postURL'       => $plugin->getPaths()->getBackendURL(),
+            'postURL'       => $postURL,
             'tplPath'       => $tplPath,
             'ShopURL'       => Shop::getURL(),
-            'adminUrl'      => $adminUrl,
+            'adminUrl'      => $postURL,
             'pluginVersion' => $plugin->getCurrentVersion(),
             'db'            => $db,
         ]);
 
-        // Handle AJAX requests
+        // Handle AJAX
         if (isset($_REQUEST['is_ajax']) && (int) $_REQUEST['is_ajax'] === 1) {
             $this->handleAjax($db);
             exit;
         }
 
-        // Determine active page from GET param
         $page = $_GET['bbf_page'] ?? 'events';
+        $action = $_GET['action'] ?? 'list';
         $smarty->assign('activePage', $page);
+        $smarty->assign('currentAction', $action);
+
+        // Dispatch to controllers - they assign data to Smarty
+        try {
+            match ($page) {
+                'events' => (new EventAdminController($db, $smarty, $postURL))->dispatch($action),
+                'categories' => (new CategoryAdminController($db, $smarty, $postURL))->dispatch($action),
+                'partners' => (new PartnerAdminController($db, $smarty, $postURL))->dispatch($action),
+                'knowledge' => (new KnowledgeAdminController($db, $smarty, $postURL))->dispatch($action),
+                'tickets' => (new TicketAdminController($db, $smarty, $postURL))->dispatch($action),
+                'areas' => (new AreaAdminController($db, $smarty, $postURL))->dispatch($action),
+                'settings' => $this->prepareSettings($smarty, $db),
+                default => (new EventAdminController($db, $smarty, $postURL))->dispatch($action),
+            };
+        } catch (\Throwable $e) {
+            $smarty->assign('error', $e->getMessage());
+        }
 
         return $smarty->fetch($tplPath . 'admin.tpl');
     }
 
-    private function handleAjax(\JTL\DB\DbInterface $db): void
+    private function prepareSettings(JTLSmarty $smarty, DbInterface $db): void
+    {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'clear_cache') {
+            $cache = Shop::Container()->getCache();
+            $cacheService = new \Plugin\bbfdesign_events\src\Service\CacheService($cache);
+            $cacheService->invalidateAll();
+            $smarty->assign('msg', 'Cache geleert');
+        }
+
+        $smarty->assign('config', [
+            'base_path' => \Plugin\bbfdesign_events\src\Config\EventConfig::BASE_PATH,
+            'items_per_page' => \Plugin\bbfdesign_events\src\Config\EventConfig::ITEMS_PER_PAGE,
+            'cache_ttl_listing' => \Plugin\bbfdesign_events\src\Config\EventConfig::CACHE_TTL_LISTING,
+            'cache_ttl_detail' => \Plugin\bbfdesign_events\src\Config\EventConfig::CACHE_TTL_DETAIL,
+            'media_base_dir' => \Plugin\bbfdesign_events\src\Config\EventConfig::MEDIA_BASE_DIR,
+            'max_upload_size' => \Plugin\bbfdesign_events\src\Config\EventConfig::MAX_UPLOAD_SIZE / 1024 / 1024 . ' MB',
+        ]);
+    }
+
+    private function handleAjax(DbInterface $db): void
     {
         header('Content-Type: application/json');
         $action = $_REQUEST['action'] ?? '';
@@ -116,44 +152,32 @@ class Bootstrap extends Bootstrapper
         $mediaService = new \Plugin\bbfdesign_events\src\Service\MediaService();
         $context = $_POST['context'] ?? 'images';
         $uploadedFiles = [];
-
         foreach ($_FILES['files']['tmp_name'] ?? [] as $i => $tmpName) {
-            $file = [
+            $result = $mediaService->upload([
                 'tmp_name' => $tmpName,
                 'name' => $_FILES['files']['name'][$i],
                 'size' => $_FILES['files']['size'][$i],
-            ];
-            $result = $mediaService->upload($file, $context);
+            ], $context);
             if ($result !== null) {
                 $uploadedFiles[] = $result;
             }
         }
-
         return ['success' => true, 'files' => $uploadedFiles];
     }
 
     private function handleMediaList(): array
     {
-        $mediaService = new \Plugin\bbfdesign_events\src\Service\MediaService();
-        return $mediaService->listFiles();
+        return (new \Plugin\bbfdesign_events\src\Service\MediaService())->listFiles();
     }
 
-    private function handlePageLoad(\JTL\DB\DbInterface $db): array
+    private function handlePageLoad(DbInterface $db): array
     {
-        $eventId = (int) ($_GET['event_id'] ?? 0);
-        $lang = $_GET['lang'] ?? 'ger';
         $repo = new \Plugin\bbfdesign_events\src\Repository\PagebuilderRepository($db);
-        $page = $repo->findByEventAndLanguage($eventId, $lang);
-
-        return [
-            'success' => true,
-            'gjs_data' => $page?->gjsData,
-            'html_rendered' => $page?->htmlRendered,
-            'css_rendered' => $page?->cssRendered,
-        ];
+        $page = $repo->findByEventAndLanguage((int) ($_GET['event_id'] ?? 0), $_GET['lang'] ?? 'ger');
+        return ['success' => true, 'gjs_data' => $page?->gjsData, 'html_rendered' => $page?->htmlRendered, 'css_rendered' => $page?->cssRendered];
     }
 
-    private function handlePageSave(\JTL\DB\DbInterface $db): array
+    private function handlePageSave(DbInterface $db): array
     {
         $input = json_decode(file_get_contents('php://input'), true);
         $repo = new \Plugin\bbfdesign_events\src\Repository\PagebuilderRepository($db);
@@ -164,7 +188,6 @@ class Bootstrap extends Bootstrapper
         $page->htmlRendered = $input['html_rendered'] ?? null;
         $page->cssRendered = $input['css_rendered'] ?? null;
         $repo->savePage($page);
-
         return ['success' => true];
     }
 
@@ -174,11 +197,9 @@ class Bootstrap extends Bootstrapper
             $db = Shop::Container()->getDB();
             $result = $db->getSingleObject("SHOW TABLES LIKE 'bbf_events'");
             if ($result === null) {
-                $migration = new Migration20260101000000($db, $this->getPlugin()->getPluginID());
-                $migration->up();
+                (new Migration20260101000000($db, $this->getPlugin()->getPluginID()))->up();
             }
-        } catch (\Throwable $e) {
-            // Log error but don't crash
+        } catch (\Throwable) {
         }
     }
 }

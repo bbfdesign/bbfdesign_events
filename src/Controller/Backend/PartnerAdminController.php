@@ -5,100 +5,74 @@ declare(strict_types=1);
 namespace Plugin\bbfdesign_events\src\Controller\Backend;
 
 use JTL\DB\DbInterface;
-use JTL\Shop;
+use JTL\Smarty\JTLSmarty;
 use Plugin\bbfdesign_events\src\Config\EventConfig;
 use Plugin\bbfdesign_events\src\Helper\SlugHelper;
 
 class PartnerAdminController
 {
-    private DbInterface $db;
-    private string $templatePath;
+    public function __construct(
+        private readonly DbInterface $db,
+        private readonly JTLSmarty $smarty,
+        private readonly string $postURL
+    ) {}
 
-    public function __construct()
+    public function dispatch(string $action): void
     {
-        $this->db = Shop::Container()->getDB();
-        $this->templatePath = EventConfig::getPluginPath() . 'adminmenu/templates/partners/';
-    }
-
-    public function dispatch(): void
-    {
-        $action = $_GET['action'] ?? 'list';
-        $smarty = Shop::Smarty();
-
         match ($action) {
-            'create' => $this->showForm($smarty),
-            'edit' => $this->showForm($smarty, (int) ($_GET['id'] ?? 0)),
-            'save' => $this->save(),
-            'delete' => $this->delete(),
-            default => $this->showList($smarty),
+            'create' => $this->prepareForm(0),
+            'edit' => $this->prepareForm((int) ($_GET['id'] ?? 0)),
+            'save' => $this->handleSave(),
+            'delete' => $this->handleDelete(),
+            default => $this->prepareList(),
         };
     }
 
-    private function showList(\Smarty $smarty): void
+    private function prepareList(): void
     {
         $partners = $this->db->getObjects(
-            'SELECT p.*, pt.name
-             FROM bbf_partners p
+            'SELECT p.*, pt.name FROM bbf_partners p
              LEFT JOIN bbf_partners_translation pt ON p.id = pt.partner_id AND pt.language_iso = :lang
              ORDER BY p.sort_order, p.id',
             ['lang' => EventConfig::DEFAULT_LANGUAGE]
         );
-
-        $smarty->assign('partners', $partners);
-        $smarty->display($this->templatePath . 'list.tpl');
+        $this->smarty->assign('partners', $partners);
     }
 
-    private function showForm(\Smarty $smarty, int $id = 0): void
+    private function prepareForm(int $id): void
     {
         $partner = null;
         $translations = [];
+        $assignedCatIds = [];
 
         if ($id > 0) {
-            $partner = $this->db->getSingleObject(
-                'SELECT * FROM bbf_partners WHERE id = :id',
-                ['id' => $id]
-            );
+            $partner = $this->db->getSingleObject('SELECT * FROM bbf_partners WHERE id = :id', ['id' => $id]);
             if ($partner === null) {
-                header('Location: ?action=list&error=notfound');
-                return;
+                header('Location: ' . $this->buildUrl('partners') . '&error=notfound');
+                exit;
             }
-            $translations = $this->db->getObjects(
-                'SELECT * FROM bbf_partners_translation WHERE partner_id = :pid',
-                ['pid' => $id]
-            );
+            $translations = $this->db->getObjects('SELECT * FROM bbf_partners_translation WHERE partner_id = :pid', ['pid' => $id]);
+            $assigned = $this->db->getObjects('SELECT category_id FROM bbf_partner_category_mapping WHERE partner_id = :pid', ['pid' => $id]);
+            $assignedCatIds = array_map(fn($r) => (int) $r->category_id, $assigned);
         }
 
         $categories = $this->db->getObjects(
-            'SELECT pc.*, pct.name
-             FROM bbf_partner_categories pc
+            'SELECT pc.*, pct.name FROM bbf_partner_categories pc
              LEFT JOIN bbf_partner_categories_translation pct ON pc.id = pct.category_id AND pct.language_iso = :lang
              ORDER BY pc.sort_order',
             ['lang' => EventConfig::DEFAULT_LANGUAGE]
         );
 
-        $assignedCatIds = [];
-        if ($id > 0) {
-            $assigned = $this->db->getObjects(
-                'SELECT category_id FROM bbf_partner_category_mapping WHERE partner_id = :pid',
-                ['pid' => $id]
-            );
-            $assignedCatIds = array_map(fn($r) => (int) $r->category_id, $assigned);
-        }
-
-        $languages = $this->db->getObjects(
-            "SELECT cISO as iso, cNameDeutsch as name FROM tsprache WHERE active = 1 ORDER BY cISO"
-        );
-
-        $smarty->assign('partner', $partner);
-        $smarty->assign('translations', $translations);
-        $smarty->assign('categories', $categories);
-        $smarty->assign('assignedCatIds', $assignedCatIds);
-        $smarty->assign('languages', $languages ?: [(object) ['iso' => 'ger', 'name' => 'Deutsch']]);
-        $smarty->assign('isEdit', $id > 0);
-        $smarty->display($this->templatePath . 'edit.tpl');
+        $this->smarty->assign('partner', $partner);
+        $this->smarty->assign('translations', $translations);
+        $this->smarty->assign('categories', $categories);
+        $this->smarty->assign('assignedCatIds', $assignedCatIds);
+        $this->smarty->assign('languages', $this->getLanguages());
+        $this->smarty->assign('isEdit', $id > 0);
+        $this->smarty->assign('activePage', 'partner_edit');
     }
 
-    private function save(): void
+    private function handleSave(): void
     {
         $id = (int) ($_POST['partner_id'] ?? 0);
         $isNew = $id === 0;
@@ -108,9 +82,7 @@ class PartnerAdminController
         $slug = SlugHelper::ensureUnique($slug, function (string $s) use ($id, $isNew) {
             $exclude = $isNew ? '' : ' AND id != :eid';
             $params = ['slug' => $s];
-            if (!$isNew) {
-                $params['eid'] = $id;
-            }
+            if (!$isNew) { $params['eid'] = $id; }
             $r = $this->db->getSingleObject("SELECT COUNT(*) as cnt FROM bbf_partners WHERE slug = :slug{$exclude}", $params);
             return (int) ($r->cnt ?? 0) > 0;
         });
@@ -130,30 +102,20 @@ class PartnerAdminController
             $this->db->update('bbf_partners', 'id', $id, $data);
         }
 
-        // Save translations
-        $languages = $this->db->getObjects("SELECT cISO as iso FROM tsprache WHERE active = 1");
-        foreach ($languages ?: [(object) ['iso' => 'ger']] as $lang) {
+        foreach ($this->getLanguages() as $lang) {
             $iso = $lang->iso;
             $name = $_POST['trans_' . $iso . '_name'] ?? '';
-            if ($name === '') {
-                continue;
-            }
+            if ($name === '') { continue; }
 
             $tData = (object) [
-                'partner_id' => $id,
-                'language_iso' => $iso,
+                'partner_id' => $id, 'language_iso' => $iso,
                 'name' => trim($name),
                 'short_desc' => ($_POST['trans_' . $iso . '_short_desc'] ?? '') !== '' ? $_POST['trans_' . $iso . '_short_desc'] : null,
                 'long_desc' => ($_POST['trans_' . $iso . '_long_desc'] ?? '') !== '' ? $_POST['trans_' . $iso . '_long_desc'] : null,
                 'cta_label' => ($_POST['trans_' . $iso . '_cta_label'] ?? '') !== '' ? $_POST['trans_' . $iso . '_cta_label'] : null,
                 'cta_url' => ($_POST['trans_' . $iso . '_cta_url'] ?? '') !== '' ? $_POST['trans_' . $iso . '_cta_url'] : null,
             ];
-
-            $existing = $this->db->getSingleObject(
-                'SELECT id FROM bbf_partners_translation WHERE partner_id = :pid AND language_iso = :lang',
-                ['pid' => $id, 'lang' => $iso]
-            );
-
+            $existing = $this->db->getSingleObject('SELECT id FROM bbf_partners_translation WHERE partner_id = :pid AND language_iso = :lang', ['pid' => $id, 'lang' => $iso]);
             if ($existing) {
                 $this->db->update('bbf_partners_translation', 'id', (int) $existing->id, $tData);
             } else {
@@ -161,24 +123,34 @@ class PartnerAdminController
             }
         }
 
-        // Sync categories
         $this->db->executeQuery('DELETE FROM bbf_partner_category_mapping WHERE partner_id = :pid', ['pid' => $id]);
         foreach ($_POST['categories'] ?? [] as $catId) {
-            $this->db->insert('bbf_partner_category_mapping', (object) [
-                'partner_id' => $id,
-                'category_id' => (int) $catId,
-            ]);
+            $this->db->insert('bbf_partner_category_mapping', (object) ['partner_id' => $id, 'category_id' => (int) $catId]);
         }
 
-        header('Location: ?action=edit&id=' . $id . '&msg=' . ($isNew ? 'created' : 'updated'));
+        header('Location: ' . $this->buildUrl('partners', 'edit', $id) . '&msg=' . ($isNew ? 'created' : 'updated'));
+        exit;
     }
 
-    private function delete(): void
+    private function handleDelete(): void
     {
         $id = (int) ($_GET['id'] ?? 0);
-        if ($id > 0) {
-            $this->db->delete('bbf_partners', 'id', $id);
-        }
-        header('Location: ?action=list&msg=deleted');
+        if ($id > 0) { $this->db->delete('bbf_partners', 'id', $id); }
+        header('Location: ' . $this->buildUrl('partners') . '&msg=deleted');
+        exit;
+    }
+
+    private function getLanguages(): array
+    {
+        $rows = $this->db->getObjects("SELECT cISO as iso, cNameDeutsch as name FROM tsprache WHERE active = 1 ORDER BY cISO");
+        return $rows ?: [(object) ['iso' => 'ger', 'name' => 'Deutsch']];
+    }
+
+    private function buildUrl(string $page, string $action = 'list', ?int $id = null): string
+    {
+        $url = $this->postURL . '&bbf_page=' . $page;
+        if ($action !== 'list') { $url .= '&action=' . $action; }
+        if ($id !== null) { $url .= '&id=' . $id; }
+        return $url;
     }
 }

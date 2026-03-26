@@ -1,7 +1,7 @@
 <div class="bbf-admin">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2>{if $isEdit}Veranstaltung bearbeiten{else}Neue Veranstaltung{/if}</h2>
-        <a href="?action=list" class="btn btn-outline-secondary">
+        <a href="{$postURL}&bbf_page=events" class="btn btn-outline-secondary">
             <i class="fa fa-arrow-left"></i> Zurück zur Liste
         </a>
     </div>
@@ -16,7 +16,7 @@
         </div>
     {/if}
 
-    <form method="post" action="?action=save" enctype="multipart/form-data">
+    <form method="post" action="{$postURL}&bbf_page=events&action=save" enctype="multipart/form-data">
         <input type="hidden" name="event_id" value="{$event->id}">
 
         {* Tab-Navigation *}
@@ -93,7 +93,7 @@
                                 </div>
                             {/foreach}
                         {else}
-                            <p class="text-muted">Keine Kategorien vorhanden. <a href="../categories?action=create">Kategorie erstellen</a></p>
+                            <p class="text-muted">Keine Kategorien vorhanden. <a href="{$postURL}&bbf_page=categories&action=create">Kategorie erstellen</a></p>
                         {/if}
                     </div>
                 </div>
@@ -165,7 +165,7 @@
             <button type="submit" class="btn btn-primary">
                 <i class="fa fa-save"></i> {if $isEdit}Speichern{else}Erstellen{/if}
             </button>
-            <a href="?action=list" class="btn btn-outline-secondary">Abbrechen</a>
+            <a href="{$postURL}&bbf_page=events" class="btn btn-outline-secondary">Abbrechen</a>
         </div>
     </form>
 </div>

@@ -20,6 +20,7 @@ class EventListFilter
     public int $page = 1;
     public int $perPage;
     public string $languageIso = 'ger';
+    public bool $showAllStatuses = false;
 
     public function __construct()
     {

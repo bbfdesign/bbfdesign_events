@@ -9,30 +9,28 @@
 </style>
 
 <div class="bbf-events-admin">
-    {* Header *}
     <div class="bbf-admin-header">
         <h1>BBF Events</h1>
         <span class="bbf-admin-version">v{$pluginVersion}</span>
     </div>
 
-    {* Navigation *}
     <div class="bbf-admin-nav">
-        <a href="{$postURL}&bbf_page=events" class="{if $activePage === 'events'}active{/if}">
+        <a href="{$postURL}&bbf_page=events" class="{if $activePage === 'events' || $activePage === 'event_edit'}active{/if}">
             <i class="fa fa-calendar-alt"></i> Veranstaltungen
         </a>
-        <a href="{$postURL}&bbf_page=categories" class="{if $activePage === 'categories'}active{/if}">
+        <a href="{$postURL}&bbf_page=categories" class="{if $activePage === 'categories' || $activePage === 'category_edit'}active{/if}">
             <i class="fa fa-tags"></i> Kategorien
         </a>
-        <a href="{$postURL}&bbf_page=partners" class="{if $activePage === 'partners'}active{/if}">
+        <a href="{$postURL}&bbf_page=partners" class="{if $activePage === 'partners' || $activePage === 'partner_edit'}active{/if}">
             <i class="fa fa-handshake"></i> Partner
         </a>
-        <a href="{$postURL}&bbf_page=knowledge" class="{if $activePage === 'knowledge'}active{/if}">
+        <a href="{$postURL}&bbf_page=knowledge" class="{if $activePage === 'knowledge' || $activePage === 'knowledge_edit'}active{/if}">
             <i class="fa fa-lightbulb"></i> Wissenswertes
         </a>
-        <a href="{$postURL}&bbf_page=tickets" class="{if $activePage === 'tickets'}active{/if}">
+        <a href="{$postURL}&bbf_page=tickets" class="{if $activePage === 'tickets' || $activePage === 'ticket_edit'}active{/if}">
             <i class="fa fa-ticket-alt"></i> Tickets
         </a>
-        <a href="{$postURL}&bbf_page=areas" class="{if $activePage === 'areas'}active{/if}">
+        <a href="{$postURL}&bbf_page=areas" class="{if $activePage === 'areas' || $activePage === 'area_edit'}active{/if}">
             <i class="fa fa-map-marked-alt"></i> Areas
         </a>
         <a href="{$postURL}&bbf_page=settings" class="{if $activePage === 'settings'}active{/if}">
@@ -40,32 +38,36 @@
         </a>
     </div>
 
-    {* Page Content *}
+    {if isset($error)}
+        <div class="alert alert-danger">{$error|escape:'html'}</div>
+    {/if}
+
     <div class="bbf-admin-content">
-        {if $activePage === 'events'}
-            {include file="{$tplPath}events/list.tpl"}
-        {elseif $activePage === 'event_edit'}
+        {* Controllers set activePage to specific values like 'event_edit' for form views *}
+        {if $activePage === 'event_edit'}
             {include file="{$tplPath}events/edit.tpl"}
-        {elseif $activePage === 'categories'}
-            {include file="{$tplPath}categories/list.tpl"}
+        {elseif $activePage === 'events'}
+            {include file="{$tplPath}events/list.tpl"}
         {elseif $activePage === 'category_edit'}
             {include file="{$tplPath}categories/edit.tpl"}
-        {elseif $activePage === 'partners'}
-            {include file="{$tplPath}partners/list.tpl"}
+        {elseif $activePage === 'categories'}
+            {include file="{$tplPath}categories/list.tpl"}
         {elseif $activePage === 'partner_edit'}
             {include file="{$tplPath}partners/edit.tpl"}
-        {elseif $activePage === 'knowledge'}
-            {include file="{$tplPath}knowledge/list.tpl"}
+        {elseif $activePage === 'partners'}
+            {include file="{$tplPath}partners/list.tpl"}
         {elseif $activePage === 'knowledge_edit'}
             {include file="{$tplPath}knowledge/edit.tpl"}
-        {elseif $activePage === 'tickets'}
-            {include file="{$tplPath}tickets/list.tpl"}
+        {elseif $activePage === 'knowledge'}
+            {include file="{$tplPath}knowledge/list.tpl"}
         {elseif $activePage === 'ticket_edit'}
             {include file="{$tplPath}tickets/edit.tpl"}
-        {elseif $activePage === 'areas'}
-            {include file="{$tplPath}areas/list.tpl"}
+        {elseif $activePage === 'tickets'}
+            {include file="{$tplPath}tickets/list.tpl"}
         {elseif $activePage === 'area_edit'}
             {include file="{$tplPath}areas/edit.tpl"}
+        {elseif $activePage === 'areas'}
+            {include file="{$tplPath}areas/list.tpl"}
         {elseif $activePage === 'settings'}
             {include file="{$tplPath}settings/index.tpl"}
         {else}

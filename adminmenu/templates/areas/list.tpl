@@ -1,7 +1,7 @@
 <div class="bbf-admin">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2>Areas / Karten</h2>
-        <a href="?action=create" class="btn btn-primary"><i class="fa fa-plus"></i> Neue Karte</a>
+        <a href="{$postURL}&bbf_page=areas&action=create" class="btn btn-primary"><i class="fa fa-plus"></i> Neue Karte</a>
     </div>
 
     {if isset($smarty.get.msg)}
@@ -30,15 +30,15 @@
                         {foreach $maps as $map}
                             <tr>
                                 <td class="text-muted">{$map->id}</td>
-                                <td><a href="?action=edit&id={$map->id}" class="fw-bold text-decoration-none">{$map->title|default:'(kein Titel)'}</a></td>
+                                <td><a href="{$postURL}&bbf_page=areas&action=edit&id={$map->id}" class="fw-bold text-decoration-none">{$map->title|default:'(kein Titel)'}</a></td>
                                 <td><span class="badge bg-light text-dark">{$map->map_type}</span></td>
                                 <td>{$map->marker_count}</td>
                                 <td>{$map->event_count}</td>
                                 <td>{if $map->is_active}<span class="badge bg-success">Ja</span>{else}<span class="badge bg-secondary">Nein</span>{/if}</td>
                                 <td>
                                     <div class="btn-group btn-group-sm">
-                                        <a href="?action=edit&id={$map->id}" class="btn btn-outline-primary"><i class="fa fa-edit"></i></a>
-                                        <a href="?action=delete&id={$map->id}" class="btn btn-outline-danger" onclick="return confirm('Karte wirklich löschen?')"><i class="fa fa-trash"></i></a>
+                                        <a href="{$postURL}&bbf_page=areas&action=edit&id={$map->id}" class="btn btn-outline-primary"><i class="fa fa-edit"></i></a>
+                                        <a href="{$postURL}&bbf_page=areas&action=delete&id={$map->id}" class="btn btn-outline-danger" onclick="return confirm('Karte wirklich löschen?')"><i class="fa fa-trash"></i></a>
                                     </div>
                                 </td>
                             </tr>

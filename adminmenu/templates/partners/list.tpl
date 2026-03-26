@@ -1,7 +1,7 @@
 <div class="bbf-admin">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2>Partner / Sponsoren</h2>
-        <a href="?action=create" class="btn btn-primary"><i class="fa fa-plus"></i> Neuer Partner</a>
+        <a href="{$postURL}&bbf_page=partners&action=create" class="btn btn-primary"><i class="fa fa-plus"></i> Neuer Partner</a>
     </div>
 
     {if isset($smarty.get.msg)}
@@ -31,14 +31,14 @@
                             <tr>
                                 <td class="text-muted">{$p->id}</td>
                                 <td>{if $p->logo}<img src="{$p->logo}" alt="" style="max-height:30px; max-width:50px;">{/if}</td>
-                                <td><a href="?action=edit&id={$p->id}" class="fw-bold text-decoration-none">{$p->name|default:'(kein Name)'}</a></td>
+                                <td><a href="{$postURL}&bbf_page=partners&action=edit&id={$p->id}" class="fw-bold text-decoration-none">{$p->name|default:'(kein Name)'}</a></td>
                                 <td><small class="text-muted">{$p->website_url|default:'-'|truncate:40}</small></td>
                                 <td>{if $p->is_active}<span class="badge bg-success">Ja</span>{else}<span class="badge bg-secondary">Nein</span>{/if}</td>
                                 <td>{$p->sort_order}</td>
                                 <td>
                                     <div class="btn-group btn-group-sm">
-                                        <a href="?action=edit&id={$p->id}" class="btn btn-outline-primary"><i class="fa fa-edit"></i></a>
-                                        <a href="?action=delete&id={$p->id}" class="btn btn-outline-danger" onclick="return confirm('Partner wirklich löschen?')"><i class="fa fa-trash"></i></a>
+                                        <a href="{$postURL}&bbf_page=partners&action=edit&id={$p->id}" class="btn btn-outline-primary"><i class="fa fa-edit"></i></a>
+                                        <a href="{$postURL}&bbf_page=partners&action=delete&id={$p->id}" class="btn btn-outline-danger" onclick="return confirm('Partner wirklich löschen?')"><i class="fa fa-trash"></i></a>
                                     </div>
                                 </td>
                             </tr>

@@ -1,7 +1,7 @@
 <div class="bbf-admin">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2>{if $isEdit}Karte bearbeiten{else}Neue Karte{/if}</h2>
-        <a href="?action=list" class="btn btn-outline-secondary"><i class="fa fa-arrow-left"></i> Zurück</a>
+        <a href="{$postURL}&bbf_page=areas" class="btn btn-outline-secondary"><i class="fa fa-arrow-left"></i> Zurück</a>
     </div>
 
     {if isset($smarty.get.msg)}
@@ -18,7 +18,7 @@
     {/if}
 
     {* Karten-Stammdaten *}
-    <form method="post" action="?action=save">
+    <form method="post" action="{$postURL}&bbf_page=areas&action=save">
         <input type="hidden" name="map_id" value="{$map->id|default:0}">
 
         <div class="row">
@@ -117,7 +117,7 @@
                                         <strong>{$group->name|default:'(ohne Name)'}</strong>
                                         {if $group->icon} <i class="fa {$group->icon} ms-1"></i>{/if}
                                     </div>
-                                    <a href="?action=delete_group&group_id={$group->id}&map_id={$map->id}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Gruppe löschen?')"><i class="fa fa-times"></i></a>
+                                    <a href="{$postURL}&bbf_page=areas&action=delete_group&group_id={$group->id}&map_id={$map->id}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Gruppe löschen?')"><i class="fa fa-times"></i></a>
                                 </div>
                             </div>
                         </div>
@@ -128,7 +128,7 @@
             <div class="card mb-4">
                 <div class="card-header"><strong>Neue Gruppe</strong></div>
                 <div class="card-body">
-                    <form method="post" action="?action=save_group" class="row g-3 align-items-end">
+                    <form method="post" action="{$postURL}&bbf_page=areas&action=save_group" class="row g-3 align-items-end">
                         <input type="hidden" name="map_id" value="{$map->id}">
                         <input type="hidden" name="group_id" value="0">
                         <div class="col-md-3">
@@ -171,7 +171,7 @@
                                     <td>{if $marker->group_name}<span class="d-inline-block rounded-circle me-1" style="width:10px;height:10px;background:{$marker->group_color};"></span>{$marker->group_name}{else}-{/if}</td>
                                     <td><small class="text-muted">{$marker->lat|default:'-'} / {$marker->lng|default:'-'}</small></td>
                                     <td><small class="text-muted">{$marker->pos_x|default:'-'}% / {$marker->pos_y|default:'-'}%</small></td>
-                                    <td><a href="?action=delete_marker&marker_id={$marker->id}&map_id={$map->id}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Marker löschen?')"><i class="fa fa-trash"></i></a></td>
+                                    <td><a href="{$postURL}&bbf_page=areas&action=delete_marker&marker_id={$marker->id}&map_id={$map->id}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Marker löschen?')"><i class="fa fa-trash"></i></a></td>
                                 </tr>
                             {/foreach}
                         </tbody>
@@ -182,7 +182,7 @@
             <div class="card">
                 <div class="card-header"><strong>Neuen Marker hinzufügen</strong></div>
                 <div class="card-body">
-                    <form method="post" action="?action=save_marker">
+                    <form method="post" action="{$postURL}&bbf_page=areas&action=save_marker">
                         <input type="hidden" name="map_id" value="{$map->id}">
                         <input type="hidden" name="marker_id" value="0">
                         <div class="row g-3">

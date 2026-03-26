@@ -16,7 +16,7 @@
                 </div>
             {/foreach}
         {else}
-            <p class="text-muted">Keine Karten vorhanden. <a href="../areas?action=create">Karte erstellen</a></p>
+            <p class="text-muted">Keine Karten vorhanden. <a href="{$postURL}&bbf_page=areas&action=create">Karte erstellen</a></p>
         {/if}
     </div>
 </div>

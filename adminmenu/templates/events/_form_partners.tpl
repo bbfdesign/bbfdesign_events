@@ -31,7 +31,7 @@
                 </table>
             </div>
         {else}
-            <p class="text-muted">Keine Partner vorhanden. <a href="../partners?action=create">Partner erstellen</a></p>
+            <p class="text-muted">Keine Partner vorhanden. <a href="{$postURL}&bbf_page=partners&action=create">Partner erstellen</a></p>
         {/if}
     </div>
 </div>

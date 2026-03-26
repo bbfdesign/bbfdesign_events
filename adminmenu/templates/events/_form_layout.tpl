@@ -1,7 +1,7 @@
 <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center">
         <strong>Visueller Seiteneditor (GrapesJS)</strong>
-        <a href="?action=pagebuilder&id={$event->id}" class="btn btn-sm btn-primary" target="_blank">
+        <a href="{$postURL}&bbf_page=events&action=pagebuilder&id={$event->id}" class="btn btn-sm btn-primary" target="_blank">
             <i class="fa fa-external-link-alt"></i> Pagebuilder öffnen
         </a>
     </div>
@@ -20,7 +20,7 @@
             <div class="text-center text-muted">
                 <i class="fa fa-paint-brush fa-3x mb-3 d-block"></i>
                 <p>Pagebuilder-Vorschau</p>
-                <a href="?action=pagebuilder&id={$event->id}" class="btn btn-outline-primary" target="_blank">
+                <a href="{$postURL}&bbf_page=events&action=pagebuilder&id={$event->id}" class="btn btn-outline-primary" target="_blank">
                     Seitenlayout bearbeiten
                 </a>
             </div>

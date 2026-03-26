@@ -1,7 +1,7 @@
 <div class="bbf-admin">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2>Ticket-Verwaltung</h2>
-        <a href="?action=create_category" class="btn btn-primary"><i class="fa fa-plus"></i> Neue Ticket-Kategorie</a>
+        <a href="{$postURL}&bbf_page=tickets&action=create_category" class="btn btn-primary"><i class="fa fa-plus"></i> Neue Ticket-Kategorie</a>
     </div>
 
     {if isset($smarty.get.msg)}
@@ -33,14 +33,14 @@
                             <tr>
                                 <td class="text-muted">{$cat->id}</td>
                                 <td><span class="d-inline-block rounded-circle" style="width:14px;height:14px;background:{$cat->color};"></span></td>
-                                <td><a href="?action=edit_category&id={$cat->id}" class="fw-bold text-decoration-none">{$cat->name|default:'(kein Name)'}</a></td>
+                                <td><a href="{$postURL}&bbf_page=tickets&action=edit_category&id={$cat->id}" class="fw-bold text-decoration-none">{$cat->name|default:'(kein Name)'}</a></td>
                                 <td><code>{$cat->slug}</code></td>
                                 <td>{$cat->ticket_count}</td>
                                 <td>{$cat->sort_order}</td>
                                 <td>
                                     <div class="btn-group btn-group-sm">
-                                        <a href="?action=edit_category&id={$cat->id}" class="btn btn-outline-primary"><i class="fa fa-edit"></i></a>
-                                        <a href="?action=delete_category&id={$cat->id}" class="btn btn-outline-danger" onclick="return confirm('Kategorie wirklich löschen?')"><i class="fa fa-trash"></i></a>
+                                        <a href="{$postURL}&bbf_page=tickets&action=edit_category&id={$cat->id}" class="btn btn-outline-primary"><i class="fa fa-edit"></i></a>
+                                        <a href="{$postURL}&bbf_page=tickets&action=delete_category&id={$cat->id}" class="btn btn-outline-danger" onclick="return confirm('Kategorie wirklich löschen?')"><i class="fa fa-trash"></i></a>
                                     </div>
                                 </td>
                             </tr>
@@ -68,7 +68,7 @@
                     <tbody>
                         {foreach $tickets as $t}
                             <tr>
-                                <td><a href="../events?action=edit&id={$t->event_id}">{$t->event_title|default:$t->event_slug}</a></td>
+                                <td><a href="{$postURL}&bbf_page=events&action=edit&id={$t->event_id}">{$t->event_title|default:$t->event_slug}</a></td>
                                 <td>{$t->ticket_name|default:'(kein Name)'}</td>
                                 <td><small class="badge bg-light text-dark">{$t->source_type}</small></td>
                                 <td>{$t->cat_name|default:'-'}</td>

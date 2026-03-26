@@ -1,7 +1,7 @@
 <div class="bbf-admin">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2>{if $isEdit}Ticket-Kategorie bearbeiten{else}Neue Ticket-Kategorie{/if}</h2>
-        <a href="?action=list" class="btn btn-outline-secondary"><i class="fa fa-arrow-left"></i> Zurück</a>
+        <a href="{$postURL}&bbf_page=tickets" class="btn btn-outline-secondary"><i class="fa fa-arrow-left"></i> Zurück</a>
     </div>
 
     {if isset($smarty.get.msg)}
@@ -11,7 +11,7 @@
         </div>
     {/if}
 
-    <form method="post" action="?action=save_category">
+    <form method="post" action="{$postURL}&bbf_page=tickets&action=save_category">
         <input type="hidden" name="category_id" value="{$category->id|default:0}">
 
         <div class="row">
@@ -74,6 +74,6 @@
         </div>
 
         <button type="submit" class="btn btn-primary"><i class="fa fa-save"></i> Speichern</button>
-        <a href="?action=list" class="btn btn-outline-secondary">Abbrechen</a>
+        <a href="{$postURL}&bbf_page=tickets" class="btn btn-outline-secondary">Abbrechen</a>
     </form>
 </div>

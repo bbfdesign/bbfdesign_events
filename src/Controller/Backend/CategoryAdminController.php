@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace Plugin\bbfdesign_events\src\Controller\Backend;
 
-use JTL\Shop;
+use JTL\DB\DbInterface;
+use JTL\Smarty\JTLSmarty;
 use Plugin\bbfdesign_events\src\Config\EventConfig;
 use Plugin\bbfdesign_events\src\Helper\SlugHelper;
 use Plugin\bbfdesign_events\src\Model\EventCategory;
@@ -14,90 +15,68 @@ use Plugin\bbfdesign_events\src\Repository\EventCategoryRepository;
 class CategoryAdminController
 {
     private EventCategoryRepository $repository;
-    private string $templatePath;
 
-    public function __construct()
-    {
-        $db = Shop::Container()->getDB();
-        $this->repository = new EventCategoryRepository($db);
-        $this->templatePath = EventConfig::getPluginPath() . 'adminmenu/templates/categories/';
+    public function __construct(
+        private readonly DbInterface $db,
+        private readonly JTLSmarty $smarty,
+        private readonly string $postURL
+    ) {
+        $this->repository = new EventCategoryRepository($this->db);
     }
 
-    public function dispatch(): void
+    public function dispatch(string $action): void
     {
-        $action = $_GET['action'] ?? 'list';
-        $smarty = Shop::Smarty();
-
         match ($action) {
-            'create' => $this->showForm($smarty),
-            'edit' => $this->showForm($smarty, (int) ($_GET['id'] ?? 0)),
-            'save' => $this->save(),
-            'delete' => $this->delete(),
-            default => $this->showList($smarty),
+            'create' => $this->prepareForm(0),
+            'edit' => $this->prepareForm((int) ($_GET['id'] ?? 0)),
+            'save' => $this->handleSave(),
+            'delete' => $this->handleDelete(),
+            default => $this->prepareList(),
         };
     }
 
-    private function showList(\Smarty $smarty): void
+    private function prepareList(): void
     {
         $categories = $this->repository->findAll(false);
-
         foreach ($categories as $cat) {
-            foreach ($cat->translations as $t) {
-                if ($t->languageIso === EventConfig::DEFAULT_LANGUAGE) {
-                    $cat->translation = $t;
-                    break;
-                }
-            }
-            if ($cat->translation === null && !empty($cat->translations)) {
-                $cat->translation = $cat->translations[0];
-            }
+            $this->resolveTranslation($cat);
         }
 
-        $smarty->assign('categories', $categories);
-        $smarty->assign('repository', $this->repository);
-        $smarty->display($this->templatePath . 'list.tpl');
+        $this->smarty->assign('categories', $categories);
+        $this->smarty->assign('repository', $this->repository);
     }
 
-    private function showForm(\Smarty $smarty, int $id = 0): void
+    private function prepareForm(int $id): void
     {
         $category = $id > 0 ? $this->repository->findById($id) : new EventCategory();
-
         if ($id > 0 && $category === null) {
-            header('Location: ?action=list&error=notfound');
-            return;
+            header('Location: ' . $this->buildUrl('categories') . '&error=notfound');
+            exit;
         }
 
         $allCategories = $this->repository->findAll(false);
         foreach ($allCategories as $cat) {
-            foreach ($cat->translations as $t) {
-                if ($t->languageIso === EventConfig::DEFAULT_LANGUAGE) {
-                    $cat->translation = $t;
-                    break;
-                }
-            }
+            $this->resolveTranslation($cat);
         }
 
-        $db = Shop::Container()->getDB();
-        $languages = $db->getObjects(
-            "SELECT cISO as iso, cNameDeutsch as name FROM tsprache WHERE active = 1 ORDER BY cISO"
-        );
+        $languages = $this->getLanguages();
 
-        $smarty->assign('category', $category);
-        $smarty->assign('allCategories', $allCategories);
-        $smarty->assign('languages', $languages ?: [(object) ['iso' => 'ger', 'name' => 'Deutsch']]);
-        $smarty->assign('isEdit', $id > 0);
-        $smarty->display($this->templatePath . 'edit.tpl');
+        $this->smarty->assign('category', $category);
+        $this->smarty->assign('allCategories', $allCategories);
+        $this->smarty->assign('languages', $languages);
+        $this->smarty->assign('isEdit', $id > 0);
+        $this->smarty->assign('activePage', 'category_edit');
     }
 
-    private function save(): void
+    private function handleSave(): void
     {
         $id = (int) ($_POST['category_id'] ?? 0);
         $isNew = $id === 0;
 
         $category = $isNew ? new EventCategory() : $this->repository->findById($id);
         if (!$isNew && $category === null) {
-            header('Location: ?action=list&error=notfound');
-            return;
+            header('Location: ' . $this->buildUrl('categories') . '&error=notfound');
+            exit;
         }
 
         $category->id = $id;
@@ -106,12 +85,8 @@ class CategoryAdminController
         $category->isActive = isset($_POST['is_active']);
         $category->image = ($_POST['image'] ?? '') !== '' ? $_POST['image'] : null;
 
-        // Generate slug from first translation name
-        $firstName = $_POST['trans_ger_name'] ?? $_POST['trans_' . EventConfig::DEFAULT_LANGUAGE . '_name'] ?? '';
-        $category->slug = ($_POST['slug'] ?? '') !== ''
-            ? $_POST['slug']
-            : SlugHelper::generate($firstName);
-
+        $firstName = $_POST['trans_ger_name'] ?? '';
+        $category->slug = ($_POST['slug'] ?? '') !== '' ? $_POST['slug'] : SlugHelper::generate($firstName);
         $category->slug = SlugHelper::ensureUnique(
             $category->slug,
             fn(string $s) => $this->repository->slugExists($s, $isNew ? null : $id)
@@ -119,16 +94,9 @@ class CategoryAdminController
 
         $savedId = $this->repository->save($category);
 
-        // Save translations
-        $db = Shop::Container()->getDB();
-        $languages = $db->getObjects(
-            "SELECT cISO as iso FROM tsprache WHERE active = 1"
-        );
-
-        foreach ($languages ?: [(object) ['iso' => 'ger']] as $lang) {
+        foreach ($this->getLanguages() as $lang) {
             $iso = $lang->iso;
             $name = $_POST['trans_' . $iso . '_name'] ?? '';
-
             if ($name === '') {
                 continue;
             }
@@ -141,28 +109,58 @@ class CategoryAdminController
             $t->metaTitle = ($_POST['trans_' . $iso . '_meta_title'] ?? '') !== '' ? $_POST['trans_' . $iso . '_meta_title'] : null;
             $t->metaDescription = ($_POST['trans_' . $iso . '_meta_description'] ?? '') !== '' ? $_POST['trans_' . $iso . '_meta_description'] : null;
 
-            // Check for existing
-            $existing = $db->getSingleObject(
+            $existing = $this->db->getSingleObject(
                 'SELECT id FROM bbf_event_categories_translation WHERE category_id = :cid AND language_iso = :lang',
                 ['cid' => $savedId, 'lang' => $iso]
             );
             if ($existing) {
                 $t->id = (int) $existing->id;
             }
-
             $this->repository->saveTranslation($t);
         }
 
-        $msg = $isNew ? 'created' : 'updated';
-        header('Location: ?action=edit&id=' . $savedId . '&msg=' . $msg);
+        header('Location: ' . $this->buildUrl('categories', 'edit', $savedId) . '&msg=' . ($isNew ? 'created' : 'updated'));
+        exit;
     }
 
-    private function delete(): void
+    private function handleDelete(): void
     {
         $id = (int) ($_GET['id'] ?? 0);
         if ($id > 0) {
             $this->repository->delete($id);
         }
-        header('Location: ?action=list&msg=deleted');
+        header('Location: ' . $this->buildUrl('categories') . '&msg=deleted');
+        exit;
+    }
+
+    private function resolveTranslation(EventCategory $cat): void
+    {
+        foreach ($cat->translations as $t) {
+            if ($t->languageIso === EventConfig::DEFAULT_LANGUAGE) {
+                $cat->translation = $t;
+                return;
+            }
+        }
+        if (!empty($cat->translations)) {
+            $cat->translation = $cat->translations[0];
+        }
+    }
+
+    private function getLanguages(): array
+    {
+        $rows = $this->db->getObjects("SELECT cISO as iso, cNameDeutsch as name FROM tsprache WHERE active = 1 ORDER BY cISO");
+        return $rows ?: [(object) ['iso' => 'ger', 'name' => 'Deutsch']];
+    }
+
+    private function buildUrl(string $page, string $action = 'list', ?int $id = null): string
+    {
+        $url = $this->postURL . '&bbf_page=' . $page;
+        if ($action !== 'list') {
+            $url .= '&action=' . $action;
+        }
+        if ($id !== null) {
+            $url .= '&id=' . $id;
+        }
+        return $url;
     }
 }

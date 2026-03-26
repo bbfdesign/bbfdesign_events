@@ -1,7 +1,7 @@
 <div class="bbf-admin">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2>Event-Kategorien</h2>
-        <a href="?action=create" class="btn btn-primary"><i class="fa fa-plus"></i> Neue Kategorie</a>
+        <a href="{$postURL}&bbf_page=categories&action=create" class="btn btn-primary"><i class="fa fa-plus"></i> Neue Kategorie</a>
     </div>
 
     {if isset($smarty.get.msg)}
@@ -30,15 +30,15 @@
                         {foreach $categories as $cat}
                             <tr>
                                 <td class="text-muted">{$cat->id}</td>
-                                <td><a href="?action=edit&id={$cat->id}" class="fw-bold text-decoration-none">{$cat->getName()|default:'(kein Name)'}</a></td>
+                                <td><a href="{$postURL}&bbf_page=categories&action=edit&id={$cat->id}" class="fw-bold text-decoration-none">{$cat->getName()|default:'(kein Name)'}</a></td>
                                 <td><code>{$cat->slug}</code></td>
                                 <td>{if $cat->isActive}<span class="badge bg-success">Ja</span>{else}<span class="badge bg-secondary">Nein</span>{/if}</td>
                                 <td>{$repository->getEventCount($cat->id)}</td>
                                 <td>{$cat->sortOrder}</td>
                                 <td>
                                     <div class="btn-group btn-group-sm">
-                                        <a href="?action=edit&id={$cat->id}" class="btn btn-outline-primary"><i class="fa fa-edit"></i></a>
-                                        <a href="?action=delete&id={$cat->id}" class="btn btn-outline-danger" onclick="return confirm('Kategorie wirklich löschen?')"><i class="fa fa-trash"></i></a>
+                                        <a href="{$postURL}&bbf_page=categories&action=edit&id={$cat->id}" class="btn btn-outline-primary"><i class="fa fa-edit"></i></a>
+                                        <a href="{$postURL}&bbf_page=categories&action=delete&id={$cat->id}" class="btn btn-outline-danger" onclick="return confirm('Kategorie wirklich löschen?')"><i class="fa fa-trash"></i></a>
                                     </div>
                                 </td>
                             </tr>

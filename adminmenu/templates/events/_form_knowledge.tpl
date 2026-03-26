@@ -16,7 +16,7 @@
                 </div>
             {/foreach}
         {else}
-            <p class="text-muted">Keine Einträge vorhanden. <a href="../knowledge?action=create">Eintrag erstellen</a></p>
+            <p class="text-muted">Keine Einträge vorhanden. <a href="{$postURL}&bbf_page=knowledge&action=create">Eintrag erstellen</a></p>
         {/if}
     </div>
 </div>

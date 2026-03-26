@@ -67,7 +67,9 @@ class EventRepository
         $where = ['1=1'];
         $params = [];
 
-        if ($filter->status !== null) {
+        if ($filter->showAllStatuses) {
+            // Admin mode: no status filter
+        } elseif ($filter->status !== null) {
             $where[] = 'e.status = :status';
             $params['status'] = $filter->status->value;
         } else {
@@ -125,9 +127,11 @@ class EventRepository
             $params['search'] = '%' . $filter->searchQuery . '%';
         }
 
-        // Sichtbarkeit (publish_from/to)
-        $where[] = '(e.publish_from IS NULL OR e.publish_from <= NOW())';
-        $where[] = '(e.publish_to IS NULL OR e.publish_to >= NOW())';
+        // Sichtbarkeit (publish_from/to) - nur im Frontend
+        if (!$filter->showAllStatuses) {
+            $where[] = '(e.publish_from IS NULL OR e.publish_from <= NOW())';
+            $where[] = '(e.publish_to IS NULL OR e.publish_to >= NOW())';
+        }
 
         $whereClause = implode(' AND ', $where);
 
