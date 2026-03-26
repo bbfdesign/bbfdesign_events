@@ -138,6 +138,101 @@ class EventAdminController
             $assignedCategoryIds = array_map(fn($r) => (int) $r->category_id, $catRows);
         }
 
+        // ── Sub-Modul Daten laden (nur bei Edit) ──────────
+        $programEntries = [];
+        $eventTickets = [];
+        $allPartners = [];
+        $assignedPartnerIds = [];
+        $partnerCategories = [];
+        $allKnowledgeItems = [];
+        $assignedKnowledgeIds = [];
+        $allAreaMaps = [];
+        $assignedAreaIds = [];
+        $eventMedia = [];
+        $eventLinks = [];
+
+        if ($eventId > 0) {
+            $lang = EventConfig::DEFAULT_LANGUAGE;
+
+            // Programm
+            $programEntries = $this->db->getObjects(
+                'SELECT pe.*, pet.title as prog_title, pet.description as prog_desc, pet.speaker_title
+                 FROM bbf_event_program_entries pe
+                 LEFT JOIN bbf_event_program_entries_translation pet ON pe.id = pet.entry_id AND pet.language_iso = :lang
+                 WHERE pe.event_id = :eid ORDER BY pe.sort_order',
+                ['eid' => $eventId, 'lang' => $lang]
+            );
+
+            // Tickets
+            $eventTickets = $this->db->getObjects(
+                'SELECT t.*, tt.name as ticket_name, tt.description as ticket_desc, tt.cta_label, tt.hint
+                 FROM bbf_event_tickets t
+                 LEFT JOIN bbf_event_tickets_translation tt ON t.id = tt.ticket_id AND tt.language_iso = :lang
+                 WHERE t.event_id = :eid ORDER BY t.sort_order',
+                ['eid' => $eventId, 'lang' => $lang]
+            );
+
+            // Partner (alle + zugewiesene)
+            $allPartners = $this->db->getObjects(
+                'SELECT p.*, pt.name FROM bbf_partners p
+                 LEFT JOIN bbf_partners_translation pt ON p.id = pt.partner_id AND pt.language_iso = :lang
+                 WHERE p.is_active = 1 ORDER BY p.sort_order',
+                ['lang' => $lang]
+            );
+            $assignedPartnerRows = $this->db->getObjects(
+                'SELECT partner_id, category_id FROM bbf_event_partner_mapping WHERE event_id = :eid',
+                ['eid' => $eventId]
+            );
+            $assignedPartnerIds = array_map(fn($r) => (int) $r->partner_id, $assignedPartnerRows);
+            $partnerCategories = $this->db->getObjects(
+                'SELECT pc.*, pct.name FROM bbf_partner_categories pc
+                 LEFT JOIN bbf_partner_categories_translation pct ON pc.id = pct.category_id AND pct.language_iso = :lang
+                 ORDER BY pc.sort_order',
+                ['lang' => $lang]
+            );
+
+            // Knowledge (alle + zugewiesene)
+            $allKnowledgeItems = $this->db->getObjects(
+                'SELECT ki.*, kit.title FROM bbf_knowledge_items ki
+                 LEFT JOIN bbf_knowledge_items_translation kit ON ki.id = kit.item_id AND kit.language_iso = :lang
+                 ORDER BY ki.sort_order',
+                ['lang' => $lang]
+            );
+            $assignedKnowledgeRows = $this->db->getObjects(
+                'SELECT item_id FROM bbf_event_knowledge_mapping WHERE event_id = :eid',
+                ['eid' => $eventId]
+            );
+            $assignedKnowledgeIds = array_map(fn($r) => (int) $r->item_id, $assignedKnowledgeRows);
+
+            // Areas (alle + zugewiesene)
+            $allAreaMaps = $this->db->getObjects(
+                'SELECT am.*, amt.title FROM bbf_area_maps am
+                 LEFT JOIN bbf_area_maps_translation amt ON am.id = amt.map_id AND amt.language_iso = :lang
+                 ORDER BY am.slug',
+                ['lang' => $lang]
+            );
+            $assignedAreaRows = $this->db->getObjects(
+                'SELECT map_id FROM bbf_event_area_mapping WHERE event_id = :eid',
+                ['eid' => $eventId]
+            );
+            $assignedAreaIds = array_map(fn($r) => (int) $r->map_id, $assignedAreaRows);
+
+            // Media
+            $eventMedia = $this->db->getObjects(
+                'SELECT * FROM bbf_event_media WHERE event_id = :eid ORDER BY sort_order',
+                ['eid' => $eventId]
+            );
+
+            // Links
+            $eventLinks = $this->db->getObjects(
+                'SELECT el.*, elt.label, elt.description as link_desc
+                 FROM bbf_event_links el
+                 LEFT JOIN bbf_event_links_translation elt ON el.id = elt.link_id AND elt.language_iso = :lang
+                 WHERE el.event_id = :eid ORDER BY el.sort_order',
+                ['eid' => $eventId, 'lang' => $lang]
+            );
+        }
+
         $this->smarty->assign('event', $event);
         $this->smarty->assign('dates', $dates);
         $this->smarty->assign('languages', $languages);
@@ -147,6 +242,19 @@ class EventAdminController
         $this->smarty->assign('eventTypes', EventDateType::cases());
         $this->smarty->assign('isEdit', $eventId > 0);
         $this->smarty->assign('activePage', 'event_edit');
+
+        // Sub-Modul Daten
+        $this->smarty->assign('programEntries', $programEntries);
+        $this->smarty->assign('eventTickets', $eventTickets);
+        $this->smarty->assign('allPartners', $allPartners);
+        $this->smarty->assign('assignedPartnerIds', $assignedPartnerIds);
+        $this->smarty->assign('partnerCategories', $partnerCategories);
+        $this->smarty->assign('allKnowledgeItems', $allKnowledgeItems);
+        $this->smarty->assign('assignedKnowledgeIds', $assignedKnowledgeIds);
+        $this->smarty->assign('allAreaMaps', $allAreaMaps);
+        $this->smarty->assign('assignedAreaIds', $assignedAreaIds);
+        $this->smarty->assign('eventMedia', $eventMedia);
+        $this->smarty->assign('eventLinks', $eventLinks);
     }
 
     private function handleSave(): void
@@ -209,6 +317,15 @@ class EventAdminController
         $categoryIds = array_map('intval', $_POST['categories'] ?? []);
         $this->eventService->syncCategories($savedId, $categoryIds);
 
+        // ── Sub-Module speichern ──────────────────────────
+        $this->saveProgram($savedId);
+        $this->saveTickets($savedId);
+        $this->savePartners($savedId);
+        $this->saveKnowledge($savedId);
+        $this->saveAreas($savedId);
+        $this->saveMedia($savedId);
+        $this->saveLinks($savedId);
+
         $msg = $isNew ? 'created' : 'updated';
         header('Location: ' . $this->buildUrl('events', 'edit', $savedId) . '&msg=' . $msg);
         exit;
@@ -244,6 +361,188 @@ class EventAdminController
                     'time_end' => ($_POST['timeslot_end'][$i][$j] ?? '') !== '' ? $_POST['timeslot_end'][$i][$j] : null,
                     'label' => ($_POST['timeslot_label'][$i][$j] ?? '') !== '' ? $_POST['timeslot_label'][$i][$j] : null,
                     'sort_order' => $j,
+                ]);
+            }
+        }
+    }
+
+    private function saveProgram(int $eventId): void
+    {
+        // Delete existing, re-insert from POST
+        $this->db->executeQuery('DELETE FROM bbf_event_program_entries WHERE event_id = :eid', ['eid' => $eventId]);
+
+        $programs = $_POST['program'] ?? [];
+        foreach ($programs as $i => $prog) {
+            $title = $prog['title_ger'] ?? '';
+            if ($title === '') {
+                continue;
+            }
+
+            $entryId = $this->db->insert('bbf_event_program_entries', (object) [
+                'event_id' => $eventId,
+                'event_date_id' => ($prog['event_date_id'] ?? '') !== '' ? (int) $prog['event_date_id'] : null,
+                'category_id' => ($prog['category_id'] ?? '') !== '' ? (int) $prog['category_id'] : null,
+                'time_start' => ($prog['time_start'] ?? '') !== '' ? $prog['time_start'] : null,
+                'time_end' => ($prog['time_end'] ?? '') !== '' ? $prog['time_end'] : null,
+                'speaker_name' => ($prog['speaker_name'] ?? '') !== '' ? $prog['speaker_name'] : null,
+                'speaker_image' => ($prog['speaker_image'] ?? '') !== '' ? $prog['speaker_image'] : null,
+                'link_url' => ($prog['link_url'] ?? '') !== '' ? $prog['link_url'] : null,
+                'sort_order' => $i,
+                'is_highlight' => isset($prog['is_highlight']) ? 1 : 0,
+            ]);
+
+            $this->db->insert('bbf_event_program_entries_translation', (object) [
+                'entry_id' => $entryId,
+                'language_iso' => 'ger',
+                'title' => trim($title),
+                'description' => ($prog['description_ger'] ?? '') !== '' ? $prog['description_ger'] : null,
+                'speaker_title' => ($prog['speaker_title_ger'] ?? '') !== '' ? $prog['speaker_title_ger'] : null,
+            ]);
+        }
+    }
+
+    private function saveTickets(int $eventId): void
+    {
+        $this->db->executeQuery('DELETE FROM bbf_event_tickets WHERE event_id = :eid', ['eid' => $eventId]);
+
+        $tickets = $_POST['tickets'] ?? [];
+        foreach ($tickets as $i => $ticket) {
+            $name = $ticket['name_ger'] ?? '';
+            if ($name === '') {
+                continue;
+            }
+
+            $ticketId = $this->db->insert('bbf_event_tickets', (object) [
+                'event_id' => $eventId,
+                'category_id' => ($ticket['category_id'] ?? '') !== '' ? (int) $ticket['category_id'] : null,
+                'source_type' => $ticket['source_type'] ?? 'external',
+                'wawi_article_id' => ($ticket['wawi_article_id'] ?? '') !== '' ? (int) $ticket['wawi_article_id'] : null,
+                'wawi_article_no' => ($ticket['wawi_article_no'] ?? '') !== '' ? $ticket['wawi_article_no'] : null,
+                'external_url' => ($ticket['external_url'] ?? '') !== '' ? $ticket['external_url'] : null,
+                'external_provider' => ($ticket['external_provider'] ?? '') !== '' ? $ticket['external_provider'] : null,
+                'price_gross' => ($ticket['price_gross'] ?? '') !== '' ? (float) $ticket['price_gross'] : null,
+                'tax_rate' => ($ticket['tax_rate'] ?? '') !== '' ? (float) $ticket['tax_rate'] : null,
+                'max_quantity' => ($ticket['max_quantity'] ?? '') !== '' ? (int) $ticket['max_quantity'] : null,
+                'available_from' => ($ticket['available_from'] ?? '') !== '' ? $ticket['available_from'] : null,
+                'available_to' => ($ticket['available_to'] ?? '') !== '' ? $ticket['available_to'] : null,
+                'is_active' => isset($ticket['is_active']) ? 1 : 1,
+                'sort_order' => (int) ($ticket['sort_order'] ?? $i),
+            ]);
+
+            $this->db->insert('bbf_event_tickets_translation', (object) [
+                'ticket_id' => $ticketId,
+                'language_iso' => 'ger',
+                'name' => trim($name),
+                'description' => ($ticket['description_ger'] ?? '') !== '' ? $ticket['description_ger'] : null,
+                'cta_label' => ($ticket['cta_label_ger'] ?? '') !== '' ? $ticket['cta_label_ger'] : null,
+                'hint' => ($ticket['hint_ger'] ?? '') !== '' ? $ticket['hint_ger'] : null,
+            ]);
+        }
+    }
+
+    private function savePartners(int $eventId): void
+    {
+        $this->db->executeQuery('DELETE FROM bbf_event_partner_mapping WHERE event_id = :eid', ['eid' => $eventId]);
+
+        $partners = $_POST['event_partners'] ?? [];
+        $sort = 0;
+        foreach ($partners as $partnerId => $mapping) {
+            if (!isset($mapping['partner_id'])) {
+                continue;
+            }
+            $this->db->insert('bbf_event_partner_mapping', (object) [
+                'event_id' => $eventId,
+                'partner_id' => (int) $mapping['partner_id'],
+                'category_id' => ($mapping['category_id'] ?? '') !== '' ? (int) $mapping['category_id'] : null,
+                'sort_order' => $sort++,
+                'is_visible' => 1,
+            ]);
+        }
+    }
+
+    private function saveKnowledge(int $eventId): void
+    {
+        $this->db->executeQuery('DELETE FROM bbf_event_knowledge_mapping WHERE event_id = :eid', ['eid' => $eventId]);
+
+        $items = $_POST['knowledge_items'] ?? [];
+        foreach ($items as $i => $itemId) {
+            $this->db->insert('bbf_event_knowledge_mapping', (object) [
+                'event_id' => $eventId,
+                'item_id' => (int) $itemId,
+                'sort_order' => $i,
+            ]);
+        }
+    }
+
+    private function saveAreas(int $eventId): void
+    {
+        $this->db->executeQuery('DELETE FROM bbf_event_area_mapping WHERE event_id = :eid', ['eid' => $eventId]);
+
+        $maps = $_POST['area_maps'] ?? [];
+        foreach ($maps as $i => $mapId) {
+            $this->db->insert('bbf_event_area_mapping', (object) [
+                'event_id' => $eventId,
+                'map_id' => (int) $mapId,
+                'sort_order' => $i,
+            ]);
+        }
+    }
+
+    private function saveMedia(int $eventId): void
+    {
+        $this->db->executeQuery('DELETE FROM bbf_event_media WHERE event_id = :eid', ['eid' => $eventId]);
+
+        $mediaItems = $_POST['media'] ?? [];
+        foreach ($mediaItems as $i => $media) {
+            $filePath = $media['file_path'] ?? '';
+            if ($filePath === '') {
+                continue;
+            }
+
+            $mediaType = $media['media_type'] ?? 'image';
+            $isExternal = in_array($mediaType, ['youtube', 'vimeo'], true);
+
+            $this->db->insert('bbf_event_media', (object) [
+                'event_id' => $eventId,
+                'media_type' => $mediaType,
+                'file_path' => !$isExternal ? $filePath : null,
+                'external_url' => $isExternal ? $filePath : null,
+                'alt_text' => ($media['alt_text'] ?? '') !== '' ? $media['alt_text'] : null,
+                'title' => ($media['title'] ?? '') !== '' ? $media['title'] : null,
+                'sort_order' => $i,
+                'context' => $media['context'] ?? 'default',
+            ]);
+        }
+    }
+
+    private function saveLinks(int $eventId): void
+    {
+        // Delete existing links + translations (cascade)
+        $this->db->executeQuery('DELETE FROM bbf_event_links WHERE event_id = :eid', ['eid' => $eventId]);
+
+        $links = $_POST['links'] ?? [];
+        foreach ($links as $i => $link) {
+            $url = $link['target_url'] ?? '';
+            $label = $link['label_ger'] ?? '';
+            if ($url === '' && $label === '') {
+                continue;
+            }
+
+            $linkId = $this->db->insert('bbf_event_links', (object) [
+                'event_id' => $eventId,
+                'link_type' => $link['link_type'] ?? 'external',
+                'target_url' => $url !== '' ? $url : null,
+                'target_id' => ($link['target_id'] ?? '') !== '' ? (int) $link['target_id'] : null,
+                'sort_order' => $i,
+                'context' => $link['context'] ?? 'related',
+            ]);
+
+            if ($label !== '') {
+                $this->db->insert('bbf_event_links_translation', (object) [
+                    'link_id' => $linkId,
+                    'language_iso' => 'ger',
+                    'label' => trim($label),
+                    'description' => ($link['description_ger'] ?? '') !== '' ? $link['description_ger'] : null,
                 ]);
             }
         }

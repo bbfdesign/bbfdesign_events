@@ -11,25 +11,60 @@
                 {foreach $eventTickets as $idx => $ticket}
                     <div class="bbf-ticket-entry border rounded p-3 mb-3" data-index="{$idx}">
                         <div class="d-flex justify-content-between align-items-start mb-2">
-                            <h6 class="mb-0">Ticket: {$ticket->getName()|default:'(kein Name)'}</h6>
+                            <h6 class="mb-0">Ticket: {$ticket->ticket_name|default:'(kein Name)'}</h6>
                             <button type="button" class="btn btn-sm btn-outline-danger bbf-remove-ticket"><i class="fa fa-times"></i></button>
                         </div>
                         <div class="row g-3">
                             <div class="col-md-4">
                                 <label class="form-label">Name (DE)</label>
-                                <input type="text" name="tickets[{$idx}][name_ger]" value="{$ticket->getName()|escape:'html'}" class="form-control">
+                                <input type="text" name="tickets[{$idx}][name_ger]" value="{$ticket->ticket_name|default:''|escape:'html'}" class="form-control">
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">Typ</label>
                                 <select name="tickets[{$idx}][source_type]" class="form-select bbf-ticket-type-select">
-                                    <option value="external"{if $ticket->sourceType->value === 'external'} selected{/if}>Externer Link</option>
-                                    <option value="wawi_article"{if $ticket->sourceType->value === 'wawi_article'} selected{/if}>Wawi-Artikel</option>
-                                    <option value="plugin_native"{if $ticket->sourceType->value === 'plugin_native'} selected{/if}>Plugin-Ticket</option>
+                                    <option value="external"{if $ticket->source_type === 'external'} selected{/if}>Externer Link</option>
+                                    <option value="wawi_article"{if $ticket->source_type === 'wawi_article'} selected{/if}>Wawi-Artikel</option>
+                                    <option value="plugin_native"{if $ticket->source_type === 'plugin_native'} selected{/if}>Plugin-Ticket</option>
                                 </select>
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">Sortierung</label>
-                                <input type="number" name="tickets[{$idx}][sort_order]" value="{$ticket->sortOrder}" class="form-control" min="0">
+                                <input type="number" name="tickets[{$idx}][sort_order]" value="{$ticket->sort_order|default:0}" class="form-control" min="0">
+                            </div>
+
+                            {* External fields *}
+                            <div class="col-md-6 bbf-ticket-field-external{if $ticket->source_type !== 'external'} d-none{/if}">
+                                <label class="form-label">Externe URL</label>
+                                <input type="url" name="tickets[{$idx}][external_url]" value="{$ticket->external_url|default:''|escape:'html'}" class="form-control">
+                            </div>
+                            <div class="col-md-6 bbf-ticket-field-external{if $ticket->source_type !== 'external'} d-none{/if}">
+                                <label class="form-label">Anbieter</label>
+                                <input type="text" name="tickets[{$idx}][external_provider]" value="{$ticket->external_provider|default:''|escape:'html'}" class="form-control">
+                            </div>
+
+                            {* Wawi fields *}
+                            <div class="col-md-6 bbf-ticket-field-wawi{if $ticket->source_type !== 'wawi_article'} d-none{/if}">
+                                <label class="form-label">Wawi Artikel-ID</label>
+                                <input type="number" name="tickets[{$idx}][wawi_article_id]" value="{$ticket->wawi_article_id|default:''}" class="form-control">
+                            </div>
+
+                            {* Native fields *}
+                            <div class="col-md-3 bbf-ticket-field-native{if $ticket->source_type !== 'plugin_native'} d-none{/if}">
+                                <label class="form-label">Preis brutto</label>
+                                <input type="number" step="0.01" name="tickets[{$idx}][price_gross]" value="{$ticket->price_gross|default:''}" class="form-control">
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label">Beschreibung (DE)</label>
+                                <textarea name="tickets[{$idx}][description_ger]" class="form-control" rows="2">{$ticket->ticket_desc|default:''|escape:'html'}</textarea>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">CTA-Label</label>
+                                <input type="text" name="tickets[{$idx}][cta_label_ger]" value="{$ticket->cta_label|default:''|escape:'html'}" class="form-control">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Hinweis</label>
+                                <input type="text" name="tickets[{$idx}][hint_ger]" value="{$ticket->hint|default:''|escape:'html'}" class="form-control">
                             </div>
                         </div>
                         <input type="hidden" name="tickets[{$idx}][id]" value="{$ticket->id}">
@@ -41,4 +76,3 @@
         </div>
     </div>
 </div>
-<script src="../../adminmenu/js/ticket-editor.js"></script>

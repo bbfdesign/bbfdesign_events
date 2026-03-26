@@ -17,27 +17,27 @@
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <label class="form-label">Titel (DE) *</label>
-                                <input type="text" name="program[{$idx}][title_ger]" value="{$entry->getTitle()|escape:'html'}" class="form-control" required>
+                                <input type="text" name="program[{$idx}][title_ger]" value="{$entry->prog_title|default:''|escape:'html'}" class="form-control" required>
                             </div>
                             <div class="col-md-3">
                                 <label class="form-label">Startzeit</label>
-                                <input type="time" name="program[{$idx}][time_start]" value="{if $entry->timeStart}{$entry->timeStart->format('H:i')}{/if}" class="form-control">
+                                <input type="time" name="program[{$idx}][time_start]" value="{$entry->time_start|default:''}" class="form-control">
                             </div>
                             <div class="col-md-3">
                                 <label class="form-label">Endzeit</label>
-                                <input type="time" name="program[{$idx}][time_end]" value="{if $entry->timeEnd}{$entry->timeEnd->format('H:i')}{/if}" class="form-control">
+                                <input type="time" name="program[{$idx}][time_end]" value="{$entry->time_end|default:''}" class="form-control">
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">Sprecher</label>
-                                <input type="text" name="program[{$idx}][speaker_name]" value="{$entry->speakerName|default:''|escape:'html'}" class="form-control">
+                                <input type="text" name="program[{$idx}][speaker_name]" value="{$entry->speaker_name|default:''|escape:'html'}" class="form-control">
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">Beschreibung (DE)</label>
-                                <textarea name="program[{$idx}][description_ger]" class="form-control" rows="1">{$entry->getDescription()|escape:'html'}</textarea>
+                                <textarea name="program[{$idx}][description_ger]" class="form-control" rows="1">{$entry->prog_desc|default:''|escape:'html'}</textarea>
                             </div>
                             <div class="col-md-4">
                                 <div class="form-check mt-4">
-                                    <input class="form-check-input" type="checkbox" name="program[{$idx}][is_highlight]" {if $entry->isHighlight}checked{/if}>
+                                    <input class="form-check-input" type="checkbox" name="program[{$idx}][is_highlight]" {if $entry->is_highlight}checked{/if}>
                                     <label class="form-check-label">Highlight</label>
                                 </div>
                             </div>
@@ -51,4 +51,3 @@
         </div>
     </div>
 </div>
-<script src="../../adminmenu/js/program-editor.js"></script>
