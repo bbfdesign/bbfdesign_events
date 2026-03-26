@@ -7,7 +7,6 @@
     },
     "dependencies": {
         "grapesjs": "^0.21.13",
-        "grapesjs-blocks-bootstrap5": "^0.2.31",
         "grapesjs-preset-webpage": "^1.0.3"
     },
     "devDependencies": {

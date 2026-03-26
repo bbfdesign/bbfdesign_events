@@ -4,7 +4,6 @@
  */
 
 import grapesjs from 'grapesjs';
-import grapesjsBlocksBootstrap5 from 'grapesjs-blocks-bootstrap5';
 import grapesjsPresetWebpage from 'grapesjs-preset-webpage';
 import { registerBbfBlocks } from './pagebuilder-blocks.js';
 import { setupBbfPanels } from './pagebuilder-panels.js';
@@ -92,29 +91,8 @@ window.BbfPagebuilder = {
                 ],
             },
 
-            plugins: [grapesjsBlocksBootstrap5, grapesjsPresetWebpage],
+            plugins: [grapesjsPresetWebpage],
             pluginsOpts: {
-                [grapesjsBlocksBootstrap5]: {
-                    blocks: {
-                        container: true,
-                        row: true,
-                        column: true,
-                        column_break: true,
-                        alert: true,
-                        tabs: true,
-                        badge: true,
-                        card: true,
-                        card_container: true,
-                        collapse: true,
-                    },
-                    blockCategories: {
-                        layout: 'Bootstrap Layout',
-                        components: 'Bootstrap Komponenten',
-                        typography: 'Typografie',
-                        media: 'Medien',
-                        forms: 'Formulare',
-                    },
-                },
                 [grapesjsPresetWebpage]: {
                     modalImportTitle: 'HTML importieren',
                     modalImportLabel: 'HTML-Code hier einfügen',

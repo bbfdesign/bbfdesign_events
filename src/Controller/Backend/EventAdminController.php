@@ -49,6 +49,7 @@ class EventAdminController
             'save' => $this->handleSave(),
             'delete' => $this->handleDelete(),
             'duplicate' => $this->handleDuplicate(),
+            'pagebuilder' => $this->openPagebuilder((int) ($_GET['id'] ?? 0)),
             default => $this->prepareList(),
         };
     }
@@ -546,6 +547,45 @@ class EventAdminController
                 ]);
             }
         }
+    }
+
+    /**
+     * Opens the GrapesJS Pagebuilder as a standalone fullscreen page.
+     * Outputs directly and exits - bypasses admin.tpl.
+     */
+    private function openPagebuilder(int $eventId): void
+    {
+        if ($eventId <= 0) {
+            header('Location: ' . $this->buildUrl('events') . '&error=notfound');
+            exit;
+        }
+
+        $event = $this->eventRepository->findById($eventId);
+        if ($event === null) {
+            header('Location: ' . $this->buildUrl('events') . '&error=notfound');
+            exit;
+        }
+        $this->resolveTranslation($event);
+
+        $languages = $this->getAvailableLanguages();
+        $currentLang = $_GET['lang'] ?? EventConfig::DEFAULT_LANGUAGE;
+
+        $this->smarty->assign('event', $event);
+        $this->smarty->assign('languages', $languages);
+        $this->smarty->assign('currentLang', $currentLang);
+        $this->smarty->assign('ajaxUrl', $this->postURL . '&bbf_page=events');
+        $this->smarty->assign('backUrl', $this->buildUrl('events', 'edit', $eventId));
+        $this->smarty->assign('csrfToken', $_SESSION['jtl_token'] ?? '');
+        $this->smarty->assign('ShopURL', \JTL\Shop::getURL());
+
+        // Render standalone page and exit (bypass admin.tpl)
+        $plugin = \JTL\Plugin\Helper::getPluginById(EventConfig::PLUGIN_ID);
+        $tplPath = $plugin
+            ? $plugin->getPaths()->getAdminPath() . 'templates/'
+            : EventConfig::getPluginPath() . 'adminmenu/templates/';
+
+        echo $this->smarty->fetch($tplPath . 'events/pagebuilder.tpl');
+        exit;
     }
 
     private function handleDelete(): void
