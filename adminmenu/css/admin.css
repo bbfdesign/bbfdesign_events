@@ -21,11 +21,11 @@ body #content_wrapper {
     display: none;
 }
 
-#tabs-bbfdesign_formbuilder .tabs-nav {
+#tabs-bbfdesign_events .tabs-nav {
     display: none;
 }
 
-#tabs-bbfdesign_formbuilder .tab-content {
+#tabs-bbfdesign_events .tab-content {
     padding: 0;
     box-shadow: 0 0 0 0 transparent;
     margin-bottom: 0 !important;

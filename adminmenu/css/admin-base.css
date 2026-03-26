@@ -1,0 +1,92 @@
+/**
+ * BBF Design System – Gemeinsame CSS Custom Properties
+ * Konsistent mit bbfdesign_customercenter, bbfdesign_search, bbfdesign_faq
+ */
+
+:root {
+    /* Farben – Primary */
+    --bbf-primary: #db2e87;
+    --bbf-primary-hover: #c41f76;
+    --bbf-primary-light: #f9e8f1;
+    --bbf-primary-badge: #c8dd9b;
+
+    /* Farben – Neutral */
+    --bbf-text-dark: #29343d;
+    --bbf-text-medium: #454545;
+    --bbf-text-light: #737385;
+    --bbf-text-white: #ffffff;
+
+    /* Farben – Background */
+    --bbf-bg-page: #f4f7fb;
+    --bbf-bg-card: #ffffff;
+    --bbf-bg-input: #f5f5f5;
+    --bbf-bg-table-header: #f6f9fc;
+    --bbf-bg-sidebar: #ffffff;
+    --bbf-bg-hover: #f0f0f5;
+
+    /* Farben – Border */
+    --bbf-border: #e6e6e8;
+    --bbf-border-light: #f7f7f7;
+    --bbf-border-input: #f5f5f5;
+
+    /* Farben – Status */
+    --bbf-success: #28a745;
+    --bbf-success-light: #d4edda;
+    --bbf-warning: #ffc107;
+    --bbf-warning-light: #fff3cd;
+    --bbf-danger: #dc3545;
+    --bbf-danger-light: #f8d7da;
+    --bbf-info: #17a2b8;
+    --bbf-info-light: #d1ecf1;
+
+    /* Typografie */
+    --bbf-font-family: "Manrope", Helvetica, Arial, Lucida, sans-serif;
+    --bbf-font-size-xs: 12px;
+    --bbf-font-size-sm: 13px;
+    --bbf-font-size-base: 14px;
+    --bbf-font-size-md: 15px;
+    --bbf-font-size-lg: 16px;
+    --bbf-font-size-xl: 20px;
+    --bbf-font-size-xxl: 27px;
+    --bbf-font-weight-light: 300;
+    --bbf-font-weight-normal: 400;
+    --bbf-font-weight-medium: 500;
+    --bbf-font-weight-bold: 700;
+
+    /* Abstände */
+    --bbf-spacing-xs: 4px;
+    --bbf-spacing-sm: 8px;
+    --bbf-spacing-md: 16px;
+    --bbf-spacing-lg: 24px;
+    --bbf-spacing-xl: 32px;
+    --bbf-spacing-xxl: 48px;
+
+    /* Border Radius */
+    --bbf-radius-none: 0px;
+    --bbf-radius-sm: 4px;
+    --bbf-radius-md: 8px;
+    --bbf-radius-lg: 10px;
+    --bbf-radius-xl: 12px;
+    --bbf-radius-pill: 50px;
+
+    /* Schatten */
+    --bbf-shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+    --bbf-shadow-md: 0 4px 12px rgba(0,0,0,0.1);
+    --bbf-shadow-lg: 0 8px 24px rgba(0,0,0,0.12);
+
+    /* Form Controls */
+    --bbf-input-height: 48px;
+    --bbf-input-padding: 0.59rem 1rem;
+    --bbf-input-border: 1px solid var(--bbf-border-input);
+    --bbf-input-radius: var(--bbf-radius-lg);
+    --bbf-input-bg: var(--bbf-bg-input);
+
+    /* Sidebar */
+    --bbf-sidebar-width: 260px;
+    --bbf-sidebar-item-height: 45px;
+    --bbf-sidebar-item-radius: var(--bbf-radius-xl);
+
+    /* Transitions */
+    --bbf-transition: 0.2s ease;
+    --bbf-transition-slow: 0.3s ease;
+}
