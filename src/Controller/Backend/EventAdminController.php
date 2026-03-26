@@ -576,7 +576,8 @@ class EventAdminController
         $this->smarty->assign('event', $event);
         $this->smarty->assign('languages', $languages);
         $this->smarty->assign('currentLang', $currentLang);
-        $this->smarty->assign('ajaxUrl', $this->postURL . '&bbf_page=events');
+        $ajaxSep = (strpos($this->postURL, '?') !== false) ? '&' : '?';
+        $this->smarty->assign('ajaxUrl', $this->postURL . $ajaxSep . 'bbf_page=events');
         $this->smarty->assign('backUrl', $this->buildUrl('events', 'edit', $eventId));
         $this->smarty->assign('csrfToken', $_SESSION['jtl_token'] ?? '');
         $this->smarty->assign('ShopURL', \JTL\Shop::getURL());
@@ -671,7 +672,8 @@ class EventAdminController
 
     private function buildUrl(string $page, string $action = 'list', ?int $id = null): string
     {
-        $url = $this->postURL . '&bbf_page=' . $page;
+        $separator = (strpos($this->postURL, '?') !== false) ? '&' : '?';
+        $url = $this->postURL . $separator . 'bbf_page=' . $page;
         if ($action !== 'list') {
             $url .= '&action=' . $action;
         }

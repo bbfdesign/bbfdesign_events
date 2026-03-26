@@ -148,7 +148,8 @@ class PartnerAdminController
 
     private function buildUrl(string $page, string $action = 'list', ?int $id = null): string
     {
-        $url = $this->postURL . '&bbf_page=' . $page;
+        $separator = (strpos($this->postURL, '?') !== false) ? '&' : '?';
+        $url = $this->postURL . $separator . 'bbf_page=' . $page;
         if ($action !== 'list') { $url .= '&action=' . $action; }
         if ($id !== null) { $url .= '&id=' . $id; }
         return $url;

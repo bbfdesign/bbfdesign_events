@@ -80,6 +80,9 @@ class Bootstrap extends Bootstrapper
         $db = Shop::Container()->getDB();
         $tplPath = $plugin->getPaths()->getAdminPath() . 'templates/';
         $postURL = $plugin->getPaths()->getBackendURL();
+        if (strpos($postURL, '?') === false) {
+            $postURL .= '?';
+        }
 
         $smarty->assign([
             'plugin'        => $plugin,
