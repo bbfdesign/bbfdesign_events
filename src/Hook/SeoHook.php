@@ -4,19 +4,152 @@ declare(strict_types=1);
 
 namespace Plugin\bbfdesign_events\src\Hook;
 
+use JTL\Plugin\PluginInterface;
 use JTL\Shop;
 use Plugin\bbfdesign_events\src\Config\EventConfig;
+use Plugin\bbfdesign_events\src\Helper\SchemaOrgHelper;
+use Plugin\bbfdesign_events\src\Repository\EventCategoryRepository;
+use Plugin\bbfdesign_events\src\Repository\EventListFilter;
+use Plugin\bbfdesign_events\src\Repository\EventRepository;
+use Plugin\bbfdesign_events\src\Repository\PagebuilderRepository;
+use Plugin\bbfdesign_events\src\Service\AreaService;
+use Plugin\bbfdesign_events\src\Service\CacheService;
+use Plugin\bbfdesign_events\src\Service\EventDateService;
+use Plugin\bbfdesign_events\src\Service\EventService;
+use Plugin\bbfdesign_events\src\Service\KnowledgeService;
+use Plugin\bbfdesign_events\src\Service\PagebuilderService;
+use Plugin\bbfdesign_events\src\Service\PartnerService;
+use Plugin\bbfdesign_events\src\Service\ProgramService;
 use Plugin\bbfdesign_events\src\Service\SeoService;
+use Plugin\bbfdesign_events\src\Service\TicketService;
 
+/**
+ * Frontend hooks for BBF Events.
+ * Pattern adapted from BBF FAQ / BBF Routes plugins.
+ *
+ * - includeAssets(): HOOK_LETZTERINCLUDE_CSS_JS – load CSS/JS
+ * - injectSmartyData(): HOOK_SMARTY_INC – assign data to Smarty
+ * - handleRouting(): HOOK_SMARTY_OUTPUTFILTER – detail page routing
+ */
 class SeoHook
 {
-    public static function handleRouting(array $args): void
+    /**
+     * HOOK_LETZTERINCLUDE_CSS_JS: Include frontend CSS/JS assets.
+     */
+    public static function includeAssets(array $args, PluginInterface $plugin): void
     {
         $requestUri = $_SERVER['REQUEST_URI'] ?? '';
         $path = parse_url($requestUri, PHP_URL_PATH) ?? '';
         $path = ltrim($path, '/');
 
-        // Only handle our routes
+        if (!str_starts_with($path, EventConfig::BASE_PATH)) {
+            return;
+        }
+
+        // CSS
+        $frontendUrl = $plugin->getPaths()->getFrontendURL();
+        $pq = $args['pq'] ?? null;
+        if ($pq !== null) {
+            $pq->find('head')->append(
+                '<link rel="stylesheet" href="' . $frontendUrl . 'css/bbf-events.css">'
+            );
+
+            // Detail page gets additional CSS
+            $seoService = new SeoService();
+            $route = $seoService->resolveRoute($path);
+            if ($route !== null && $route['type'] === 'detail') {
+                $pq->find('head')->append(
+                    '<link rel="stylesheet" href="' . $frontendUrl . 'css/bbf-events-detail.css">'
+                );
+            }
+        }
+    }
+
+    /**
+     * HOOK_SMARTY_INC: Inject event data into Smarty before template rendering.
+     * This is called for FrontendLink pages (the listing page registered in info.xml).
+     */
+    public static function injectSmartyData(array $args, PluginInterface $plugin): void
+    {
+        $smarty = Shop::Smarty();
+
+        try {
+            $db = Shop::Container()->getDB();
+
+            // Check if tables exist
+            $tableCheck = $db->getSingleObject("SHOW TABLES LIKE 'bbf_events'");
+            if ($tableCheck === null) {
+                return;
+            }
+
+            $languageIso = Shop::getLanguageISO();
+            $seoService = new SeoService();
+            $eventRepository = new EventRepository($db);
+            $categoryRepository = new EventCategoryRepository($db);
+            $dateService = new EventDateService();
+            $cacheService = new CacheService(Shop::Container()->getCache());
+            $eventService = new EventService($eventRepository, $dateService, $seoService, $cacheService);
+
+            $pluginPath = $plugin->getPaths()->getFrontendPath() . 'template/events/';
+
+            // Always provide these for any event page
+            $smarty->assign('bbfEventsPath', $pluginPath);
+            $smarty->assign('ShopURL', Shop::getURL());
+            $smarty->assign('listingUrl', $seoService->getListingUrl());
+            $smarty->assign('archiveUrl', $seoService->getArchiveUrl());
+
+            // Determine route from URL
+            $requestUri = $_SERVER['REQUEST_URI'] ?? '';
+            $path = ltrim(parse_url($requestUri, PHP_URL_PATH) ?? '', '/');
+
+            if (!str_starts_with($path, EventConfig::BASE_PATH)) {
+                return;
+            }
+
+            $route = $seoService->resolveRoute($path);
+            if ($route === null) {
+                return;
+            }
+
+            // Load categories for filter bar
+            $categories = $categoryRepository->findAll();
+            foreach ($categories as $cat) {
+                foreach ($cat->translations as $t) {
+                    if ($t->languageIso === $languageIso) {
+                        $cat->translation = $t;
+                        break;
+                    }
+                }
+                if ($cat->translation === null && !empty($cat->translations)) {
+                    $cat->translation = $cat->translations[0];
+                }
+            }
+            $smarty->assign('categories', $categories);
+
+            match ($route['type']) {
+                'listing' => self::prepareListingData($smarty, $eventService, $languageIso, false),
+                'archive' => self::prepareListingData($smarty, $eventService, $languageIso, true),
+                'category' => self::prepareCategoryData($smarty, $eventService, $categoryRepository, $languageIso, $route['slug']),
+                'detail' => self::prepareDetailData($smarty, $eventService, $db, $plugin, $languageIso, $route['slug']),
+                default => null,
+            };
+        } catch (\Throwable $e) {
+            // Don't crash the shop
+        }
+    }
+
+    /**
+     * HOOK_SMARTY_OUTPUTFILTER: Handle detail page routing.
+     * For event detail pages that aren't registered as FrontendLinks,
+     * we need to intercept the output and render the correct template.
+     */
+    public static function handleRouting(array $args): void
+    {
+        // The FrontendLink handles /veranstaltungen (listing).
+        // Detail, category, archive pages need output filter handling.
+        $requestUri = $_SERVER['REQUEST_URI'] ?? '';
+        $path = ltrim(parse_url($requestUri, PHP_URL_PATH) ?? '', '/');
+
         if (!str_starts_with($path, EventConfig::BASE_PATH)) {
             return;
         }
@@ -24,35 +157,132 @@ class SeoHook
         $seoService = new SeoService();
         $route = $seoService->resolveRoute($path);
 
-        if ($route === null) {
+        if ($route === null || $route['type'] === 'listing') {
+            return; // Listing is handled by FrontendLink
+        }
+
+        // For detail/category/archive: data was already injected in injectSmartyData()
+        // The template rendering happens through the FrontendLink page template
+    }
+
+    // ── Data Preparation Methods ──────────────────────────
+
+    private static function prepareListingData(
+        \Smarty $smarty,
+        EventService $eventService,
+        string $languageIso,
+        bool $isArchive
+    ): void {
+        $params = $_GET;
+        if ($isArchive) {
+            $params['status'] = 'past';
+        }
+
+        $filter = EventListFilter::fromRequest($params, $languageIso);
+        if (!$isArchive && $filter->temporalStatus === null) {
+            $filter->temporalStatus = 'upcoming';
+        }
+
+        $result = $eventService->getEventListing($filter);
+
+        $smarty->assign('events', $result->events);
+        $smarty->assign('pagination', $result);
+        $smarty->assign('filter', $filter);
+        $smarty->assign('isArchive', $isArchive);
+    }
+
+    private static function prepareCategoryData(
+        \Smarty $smarty,
+        EventService $eventService,
+        EventCategoryRepository $categoryRepository,
+        string $languageIso,
+        string $categorySlug
+    ): void {
+        $category = $categoryRepository->findBySlug($categorySlug);
+        if ($category === null) {
             return;
         }
 
-        // Store route info for controller dispatch
-        $_SESSION['bbf_events_route'] = $route;
-
-        // Prevent JTL from handling this as a 404
-        $args['bSeite'] = true;
-
-        // Dispatch to appropriate controller
-        $controllerClass = match ($route['type']) {
-            'listing', 'archive' => \Plugin\bbfdesign_events\src\Controller\Frontend\EventListController::class,
-            'category' => \Plugin\bbfdesign_events\src\Controller\Frontend\EventCategoryController::class,
-            'detail' => \Plugin\bbfdesign_events\src\Controller\Frontend\EventDetailController::class,
-            default => null,
-        };
-
-        if ($controllerClass !== null && class_exists($controllerClass)) {
-            $controller = new $controllerClass();
-            $controller->dispatch($route);
+        foreach ($category->translations as $t) {
+            if ($t->languageIso === $languageIso) {
+                $category->translation = $t;
+                break;
+            }
         }
+        if ($category->translation === null && !empty($category->translations)) {
+            $category->translation = $category->translations[0];
+        }
+
+        $filter = EventListFilter::fromRequest($_GET, $languageIso);
+        $filter->categorySlug = $categorySlug;
+        if ($filter->temporalStatus === null) {
+            $filter->temporalStatus = 'upcoming';
+        }
+
+        $result = $eventService->getEventListing($filter);
+
+        $smarty->assign('category', $category);
+        $smarty->assign('events', $result->events);
+        $smarty->assign('pagination', $result);
+        $smarty->assign('filter', $filter);
     }
 
+    private static function prepareDetailData(
+        \Smarty $smarty,
+        EventService $eventService,
+        \JTL\DB\DbInterface $db,
+        PluginInterface $plugin,
+        string $languageIso,
+        string $slug
+    ): void {
+        $event = $eventService->getEventBySlug($slug, $languageIso);
+        if ($event === null) {
+            return;
+        }
+
+        // Pagebuilder output
+        try {
+            $pageRepo = new PagebuilderRepository($db);
+            $programService = new ProgramService($db);
+            $partnerService = new PartnerService($db);
+            $ticketService = new TicketService($db);
+            $knowledgeService = new KnowledgeService($db);
+            $areaService = new AreaService($db);
+
+            $pagebuilderService = new PagebuilderService(
+                $pageRepo, $programService, $partnerService,
+                $ticketService, $knowledgeService, $areaService
+            );
+
+            $pageResult = $pagebuilderService->renderPage($event, $languageIso);
+            $smarty->assign('pageBuilderHtml', $pageResult->html);
+            $smarty->assign('pageBuilderCss', $pageResult->css);
+        } catch (\Throwable) {
+            $smarty->assign('pageBuilderHtml', '');
+            $smarty->assign('pageBuilderCss', '');
+        }
+
+        // Tickets
+        $ticketService = new TicketService($db);
+        $tickets = $ticketService->getTicketsForEvent($event->id, $languageIso);
+
+        // Schema.org
+        $schema = SchemaOrgHelper::generateEventSchema($event, Shop::getURL());
+        $schema = SchemaOrgHelper::addTicketOffers($schema, $tickets, Shop::getURL());
+        $schemaJsonLd = SchemaOrgHelper::toJsonLd($schema);
+
+        $smarty->assign('event', $event);
+        $smarty->assign('tickets', $tickets);
+        $smarty->assign('schemaJsonLd', $schemaJsonLd);
+    }
+
+    /**
+     * Sitemap integration.
+     */
     public static function addToSitemap(array $args): void
     {
         $db = Shop::Container()->getDB();
 
-        // Check if tables exist before querying
         try {
             $tableCheck = $db->getSingleObject("SHOW TABLES LIKE 'bbf_events'");
             if ($tableCheck === null) {
@@ -65,14 +295,12 @@ class SeoHook
         $seoService = new SeoService();
         $baseUrl = Shop::getURL();
 
-        // Add listing page
         $args['sitemap'][] = [
             'loc' => $baseUrl . $seoService->getListingUrl(),
             'changefreq' => 'daily',
             'priority' => '0.8',
         ];
 
-        // Add published events
         $rows = $db->getObjects(
             "SELECT e.slug, e.updated_at FROM bbf_events e WHERE e.status = 'published'"
         );
@@ -86,11 +314,7 @@ class SeoHook
             ];
         }
 
-        // Add categories
-        $catRows = $db->getObjects(
-            'SELECT slug FROM bbf_event_categories WHERE is_active = 1'
-        );
-
+        $catRows = $db->getObjects('SELECT slug FROM bbf_event_categories WHERE is_active = 1');
         foreach ($catRows as $row) {
             $args['sitemap'][] = [
                 'loc' => $baseUrl . '/' . EventConfig::BASE_PATH . '/kategorie/' . $row->slug,

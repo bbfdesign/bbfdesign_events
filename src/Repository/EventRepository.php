@@ -151,14 +151,15 @@ class EventRepository
             default => '(SELECT MIN(ed.date_start) FROM bbf_event_dates ed WHERE ed.event_id = e.id) ASC',
         };
 
-        $offset = ($filter->page - 1) * $filter->perPage;
+        $limit = (int) $filter->perPage;
+        $offset = (int) (($filter->page - 1) * $filter->perPage);
 
         $rows = $this->db->getObjects(
             "SELECT e.* FROM bbf_events e
              WHERE {$whereClause}
              ORDER BY {$orderBy}
-             LIMIT :limit OFFSET :offset",
-            array_merge($params, ['limit' => $filter->perPage, 'offset' => $offset])
+             LIMIT {$limit} OFFSET {$offset}",
+            $params
         );
 
         $events = [];
